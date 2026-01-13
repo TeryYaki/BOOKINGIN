@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avengers: Endgame – Bookingin</title>
+    <title>{{ $movie->title }} – Bookingin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         body {
@@ -11,482 +12,312 @@
             font-family: Arial, sans-serif;
             background: #000;
             color: white;
+            overflow-x: hidden;
         }
 
-        /* ================= NAVBAR ================== */
+        /* --- NAVBAR (Konsisten dengan Main) --- */
         .navbar {
-            width: 100%;
-            padding: 15px 40px;
-            background: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(6px);
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.9); /* Sedikit transparan agar menyatu */
+            padding: 1rem 2rem;
             position: fixed;
+            width: 100%;
             top: 0;
             z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            box-sizing: border-box; /* Agar padding tidak menambah lebar */
         }
-
-        .navbar-container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
         .navbar .logo {
-            font-size: 22px;
+            font-size: 1.5rem;
             font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        .navbar nav a {
             color: white;
-            text-decoration: none;
-            margin-left: 25px;
-            font-size: 15px;
-            transition: 0.2s;
+            letter-spacing: 2px;
         }
-
-        .navbar nav a:hover {
-            color: #3b82f6;
-        }
-
-        .right {
+        .navbar nav {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 1.5rem;
         }
-
-        .search-bar input {
-            padding: 6px 10px;
-            border-radius: 6px;
-            border: none;
-            outline: none;
-        }
-
-        .btn-outline {
-            padding: 7px 14px;
-            border-radius: 6px;
-            border: 1px solid white;
+        .navbar a {
             color: white;
             text-decoration: none;
-            transition: 0.2s;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+        .navbar a:hover { color: #3b82f6; }
+
+        /* User Profile Style */
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-left: 15px;
+            border-left: 1px solid #333;
+        }
+        .user-avatar {
+            width: 35px; height: 35px; border-radius: 50%; border: 2px solid #3b82f6;
+        }
+        .btn-logout {
+            background: #ef4444; color: white; border: none; padding: 6px 15px;
+            border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s;
+        }
+        .btn-logout:hover { background: #dc2626; }
+        .btn-login {
+            background: #3b82f6; padding: 8px 20px; border-radius: 5px; color: white !important; font-weight: bold;
         }
 
-        .btn-outline:hover {
-            background: white;
-            color: black;
-        }
-
-        .btn-primary {
-            padding: 7px 14px;
-            border-radius: 6px;
-            background: #2563eb;
-            color: white;
-            text-decoration: none;
-            transition: 0.2s;
-        }
-
-        .btn-primary:hover {
-            background: #1d4ed8;
-        }
-
-        /* ================= HERO ================== */
+        /* --- HERO SECTION (DETAIL FILM) --- */
         .hero {
-            height: 60vh;
-            background-image: url('/images/Avengers2.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
             position: relative;
-            margin-top: 80px;
-            /* Overlay untuk membuat teks lebih terbaca dan background lebih rapi */
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 50%, transparent 100%), url('/images/Avengers2.jpg');
+            height: 80vh;
             background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            background-position: center top;
+            display: flex;
+            align-items: flex-end;
+            padding-bottom: 60px;
+        }
+        /* Overlay Gradient Gelap */
+        .hero::before {
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(to top, #000 10%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0.6) 100%);
         }
 
         .hero-content {
-            position: absolute;
-            bottom: 40px;
-            left: 40px;
-            max-width: 800px;
-            z-index: 10; /* Pastikan teks di atas overlay */
+            position: relative; z-index: 10;
+            width: 100%; max-width: 1100px; margin: 0 auto;
+            display: flex; gap: 40px; align-items: flex-end; padding: 0 20px;
         }
 
-        .hero h1 {
-            font-size: 48px;
-            font-weight: bold;
-            margin: 0;
+        /* Poster Kecil */
+        .poster-card {
+            width: 220px; height: 330px;
+            border-radius: 10px; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 3px solid white; flex-shrink: 0;
+            background: #000;
+        }
+        .poster-card img {
+            width: 100%; height: 100%;
+            object-fit: fill; /* DIPERBAIKI: Menggunakan fill agar tidak terpotong */
         }
 
-        .hero .meta {
-            margin-top: 10px;
-            opacity: 0.9;
-            font-size: 18px;
+        /* Info Film */
+        .movie-info { flex: 1; }
+        .movie-info h1 {
+            font-size: 48px; font-weight: bold; margin: 0 0 15px 0;
+            text-shadow: 2px 2px 10px black; line-height: 1.1;
         }
+        .meta-tags { display: flex; gap: 10px; margin-bottom: 20px; color: #ddd; font-size: 14px; }
+        .tag { background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 4px; backdrop-filter: blur(5px); }
+        .synopsis { font-size: 16px; line-height: 1.6; color: #ccc; max-width: 700px; }
 
-        .hero .synopsis {
-            margin-top: 15px;
-            font-size: 16px;
-            line-height: 1.5;
-            opacity: 0.9;
-            max-width: 700px;
+        /* --- JADWAL TAYANG --- */
+        .schedule-section { background: #000; padding: 40px 20px; }
+        .schedule-box {
+            max-width: 900px; margin: 0 auto; background: #1b1b1b;
+            border: 1px solid #333; border-radius: 12px; padding: 30px;
         }
-
-        /* ================= CONTENT ================== */
-        .content-wrapper {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            /* Tambahkan background gambar di belakang tab jadwal tayang dan tulisan */
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.7) 100%), url('/images/Avengers2.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed; /* Agar gambar tetap saat scroll */
-            padding: 0 20px; /* Tambahkan padding agar tidak terlalu mepet */
-        }
-
-        .content-box {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.9); /* Buat semi-transparan agar gambar terlihat di belakang */
-            color: #222;
-            border-radius: 20px;
-            padding: 30px;
-            margin-top: -40px;
-            margin-bottom: 60px;
-            backdrop-filter: blur(5px); /* Efek blur untuk membuatnya lebih elegan */
-        }
-
-        .section-title {
-            font-size: 26px;
-            font-weight: bold;
-            margin-bottom: 25px;
-        }
-
-        .format-text {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .price {
-            margin-left: 10px;
-            color: #0051ff;
-            font-weight: bold;
-        }
-
-        /* ================= TIMES ================== */
-        .times-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 20px;
-        }
-
+        .section-title { font-size: 20px; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px; color: #3b82f6; }
+        
         .time-btn {
-            padding: 10px 18px;
-            border: 2px solid #0044ff;
-            border-radius: 8px;
-            color: #0044ff;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
+            padding: 10px 25px; background: transparent; border: 1px solid #555;
+            color: white; border-radius: 6px; cursor: pointer; font-weight: bold;
+            transition: 0.3s; margin-right: 10px; margin-bottom: 10px;
         }
+        .time-btn:hover { background: #3b82f6; border-color: #3b82f6; transform: translateY(-2px); }
 
-        .time-btn:hover {
-            background: #0044ff;
-            color: white;
-        }
-
-        /* ================= SEAT SELECTION MODAL ================== */
+        /* --- MODAL POPUP KURSI --- */
         .modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            justify-content: center;
-            align-items: center;
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.9); justify-content: center; align-items: center;
         }
-
         .modal-content {
-            background: white;
-            color: #222;
-            padding: 30px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 80vh;
-            overflow-y: auto;
+            background: #1a1a1a; padding: 30px; border-radius: 12px;
+            width: 90%; max-width: 500px; border: 1px solid #333; text-align: center;
         }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close:hover {
-            color: black;
-        }
-
         .screen {
-            text-align: center;
-            margin-bottom: 20px;
-            font-weight: bold;
-            color: #333;
+            background: linear-gradient(to bottom, #3b82f6, transparent); height: 40px; width: 80%;
+            margin: 0 auto 30px; border-radius: 50% 50% 0 0 / 20px 20px 0 0; opacity: 0.6;
+            font-size: 10px; display: flex; align-items: center; justify-content: center; letter-spacing: 3px;
         }
-
-        .seats {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .row {
-            display: flex;
-            margin-bottom: 10px;
-        }
-
+        .seats-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; justify-content: center; margin-bottom: 20px; }
         .seat {
-            width: 30px;
-            height: 30px;
-            margin: 2px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 12px;
-            background: #f0f0f0;
+            height: 30px; background: #333; border-radius: 4px; cursor: pointer;
+            border-top: 2px solid #555; transition: 0.2s;
         }
-
-        .seat.available:hover {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .seat.selected {
-            background: #2563eb;
-            color: white;
-        }
-
-        .seat.occupied {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        .legend {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-            gap: 20px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .legend-seat {
-            width: 20px;
-            height: 20px;
-            border-radius: 3px;
-        }
-
+        .seat:hover { background: #555; }
+        .seat.selected { background: #3b82f6; border-color: #60a5fa; }
+        .seat.occupied { background: #ef4444; border-color: #991b1b; opacity: 0.3; cursor: not-allowed; }
+        
         .confirm-btn {
-            display: block;
-            margin: 20px auto;
-            padding: 10px 20px;
-            background: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
+            width: 100%; padding: 12px; background: #3b82f6; color: white; border: none;
+            border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 20px;
         }
+        .confirm-btn:hover { background: #2563eb; }
+        .close { float: right; font-size: 24px; cursor: pointer; margin-top: -10px; }
 
-        .confirm-btn:hover {
-            background: #1d4ed8;
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .hero { height: auto; padding-top: 100px; padding-bottom: 40px; display: block; }
+            .hero-content { flex-direction: column; align-items: center; text-align: center; }
+            .poster-card { margin-bottom: 20px; width: 160px; height: 240px; }
+            .movie-info h1 { font-size: 32px; }
+            .meta-tags { justify-content: center; }
+            .navbar nav { gap: 10px; }
+            .user-menu { border-left: none; padding-left: 0; }
+            .user-name { display: none; } /* Sembunyikan nama user di HP biar muat */
         }
     </style>
 </head>
-
 <body>
 
-    <!-- ================= NAVBAR ================= -->
     <header class="navbar">
-        <div class="navbar-container">
-            <div class="logo">BOOKINGIN</div>
-            <nav>
-                <a href="/">Beranda</a>
-                <a href="/movies">Movies</a>
-            </nav>
-            <div class="right">
-                <div class="search-bar">
-                    <input type="text" placeholder="Cari film...">
+        <div class="logo">BOOKINGIN</div>
+        <nav>
+            <a href="{{ route('home') }}">Beranda</a>
+            <a href="{{ route('movies') }}">Movies</a>
+
+            @guest
+                <a href="{{ route('login') }}" class="btn-login">Masuk</a>
+            @endguest
+
+            @auth
+                <div class="user-menu">
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=3b82f6&color=fff" class="user-avatar" alt="Avatar">
+                    <span class="user-name" style="font-weight:bold;">{{ Auth::user()->name }}</span>
+                    
+                    <form action="{{ route('logout') }}" method="POST" style="margin:0;">
+                        @csrf
+                        <button type="submit" class="btn-logout">Keluar</button>
+                    </form>
                 </div>
-                <a class="btn-outline" href="/login">Login</a>
-                <a class="btn-primary" href="/register">Daftar</a>
-            </div>
-        </div>
+            @endauth
+        </nav>
     </header>
 
-    <!-- ================= HERO ================= -->
-    <div class="hero">
+    <div class="hero" style="background-image: url('{{ asset($movie->poster_path) }}');">
         <div class="hero-content">
-            <h1>Avengers: Endgame</h1>
-            <div class="meta">
-                Action, Adventure, Drama • 3h 1m • PG-13 • English
+            <div class="poster-card">
+                <img src="{{ asset($movie->poster_path) }}" alt="{{ $movie->title }}">
             </div>
-            <div class="synopsis">
-                Setelah peristiwa menghancurkan di Avengers: Infinity War, alam semesta hancur.
-                Dengan bantuan sekutu yang tersisa, para Avengers berkumpul sekali lagi untuk
-                membalikkan tindakan Thanos dan memulihkan ketertiban di alam semesta.
+
+            <div class="movie-info">
+                <h1>{{ $movie->title }}</h1>
+                
+                <div class="meta-tags">
+                    <span class="tag">2D</span>
+                    <span class="tag" style="{{ $movie->status == 'upcoming' ? 'background: #eab308; color: black;' : 'background: #22c55e; color: white;' }}">
+                        {{ $movie->status == 'now_showing' ? 'SEDANG TAYANG' : 'SEGERA TAYANG' }}
+                    </span>
+                    <span class="tag"><i class="fa-regular fa-clock"></i> 120 Menit</span>
+                </div>
+
+                <div class="synopsis">
+                    {{ $movie->description ?? 'Sinopsis belum tersedia untuk film ini. Silakan tonton trailernya atau cek info lebih lanjut nanti.' }}
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- ================= CONTENT WRAPPER ================= -->
-    <div class="content-wrapper">
-        <div class="content-box">
-            <div class="section-title">Jadwal Tayang</div>
-            <div class="format-text">
-                REGULAR 2D
-                <span class="price">Rp 52.000</span>
-            </div>
-            <div class="times-grid">
-                <div class="time-btn" data-time="09:30">09:30</div>
-                <div class="time-btn" data-time="12:30">12:30</div>
-                <div class="time-btn" data-time="15:30">15:30</div>
-                <div class="time-btn" data-time="18:30">18:30</div>
-                <div class="time-btn" data-time="21:30">21:30</div>
-            </div>
+    <div class="schedule-section">
+        <div class="schedule-box">
+            <div class="section-title">Jadwal Tayang (Regular 2D) - Rp 45.000</div>
+            
+            @if($movie->status == 'now_showing')
+                <div>
+                    <button class="time-btn" onclick="openModal('13:00')">13:00</button>
+                    <button class="time-btn" onclick="openModal('15:30')">15:30</button>
+                    <button class="time-btn" onclick="openModal('18:00')">18:00</button>
+                    <button class="time-btn" onclick="openModal('20:30')">20:30</button>
+                </div>
+            @else
+                <p style="color: #888; font-style: italic; padding: 20px; text-align: center;">
+                    <i class="fa-solid fa-calendar-xmark" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+                    Maaf, tiket belum tersedia. Film ini akan segera tayang.
+                </p>
+            @endif
         </div>
     </div>
 
-    <!-- ================= SEAT SELECTION MODAL ================= -->
     <div id="seatModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Pilih Kursi - <span id="selectedTime"></span></h2>
-            <div class="screen">LAYAR</div>
-            <div class="seats" id="seatsContainer">
-                <!-- Seats will be generated here -->
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3 style="margin-top:0">Pilih Kursi <span id="timeDisplay" style="color:#3b82f6"></span></h3>
+            
+            <div class="screen">LAYAR BIOSKOP</div>
+            
+            <div class="seats-grid" id="seatsContainer">
+                </div>
+
+            <div style="display:flex; justify-content:center; gap:15px; font-size:12px; color:#888; margin-top:15px;">
+                <span style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background:#333;"></div> Kosong</span>
+                <span style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background:#3b82f6;"></div> Dipilih</span>
+                <span style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background:#ef4444;"></div> Terisi</span>
             </div>
-            <div class="legend">
-                <div class="legend-item">
-                    <div class="legend-seat" style="background: #f0f0f0;"></div>
-                    <span>Tersedia</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-seat" style="background: #2563eb;"></div>
-                    <span>Dipilih</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-seat" style="background: #ccc;"></div>
-                    <span>Tidak Tersedia</span>
-                </div>
-            </div>
-            <button class="confirm-btn" id="confirmBtn">Konfirmasi Pemesanan</button>
+
+            <button class="confirm-btn" onclick="confirmBooking()">Konfirmasi Pesanan</button>
         </div>
     </div>
 
     <script>
-        // Modal elements
         const modal = document.getElementById('seatModal');
-        const closeBtn = document.querySelector('.close');
-        const confirmBtn = document.getElementById('confirmBtn');
-        const selectedTimeSpan = document.getElementById('selectedTime');
-        const seatsContainer = document.getElementById('seatsContainer');
-
-        // Seat layout: 10 rows (A-J), 10 seats per row
-        const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
-        const seatsPerRow = 10;
+        const container = document.getElementById('seatsContainer');
         let selectedSeats = [];
 
-        // Generate seats
-        function generateSeats() {
-            seatsContainer.innerHTML = '';
-            rows.forEach(row => {
-                const rowDiv = document.createElement('div');
-                rowDiv.className = 'row';
-                for (let i = 1; i <= seatsPerRow; i++) {
-                    const seatDiv = document.createElement('div');
-                    seatDiv.className = 'seat available';
-                    seatDiv.textContent = row + i;
-                    seatDiv.dataset.seat = row + i;
-                    // Randomly mark some seats as occupied
-                    if (Math.random() < 0.3) {
-                        seatDiv.classList.remove('available');
-                        seatDiv.classList.add('occupied');
+        function openModal(time) {
+            document.getElementById('timeDisplay').innerText = time;
+            container.innerHTML = ''; // Reset kursi
+            selectedSeats = [];
+            
+            // Buat 40 Kursi Dummy
+            for (let i = 1; i <= 40; i++) {
+                let seat = document.createElement('div');
+                seat.classList.add('seat');
+                seat.innerText = i; // Nomor kursi
+                seat.style.fontSize = "10px";
+                seat.style.display = "flex";
+                seat.style.alignItems = "center";
+                seat.style.justifyContent = "center";
+                
+                // Simulasi acak kursi terisi
+                if (Math.random() < 0.2) seat.classList.add('occupied');
+                
+                seat.onclick = function() {
+                    if (seat.classList.contains('occupied')) return;
+                    
+                    seat.classList.toggle('selected');
+                    
+                    if (seat.classList.contains('selected')) {
+                        selectedSeats.push(i);
+                    } else {
+                        selectedSeats = selectedSeats.filter(s => s !== i);
                     }
-                    seatDiv.addEventListener('click', toggleSeat);
-                    rowDiv.appendChild(seatDiv);
-                }
-                seatsContainer.appendChild(rowDiv);
-            });
-        }
-
-        // Toggle seat selection
-        function toggleSeat(e) {
-            const seat = e.target;
-            if (seat.classList.contains('occupied')) return;
-            seat.classList.toggle('selected');
-            const seatId = seat.dataset.seat;
-            if (seat.classList.contains('selected')) {
-                selectedSeats.push(seatId);
-            } else {
-                selectedSeats = selectedSeats.filter(s => s !== seatId);
+                };
+                container.appendChild(seat);
             }
+            modal.style.display = 'flex';
         }
 
-        // Open modal when time button is clicked
-        document.querySelectorAll('.time-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const time = this.dataset.time;
-                selectedTimeSpan.textContent = time;
-                selectedSeats = [];
-                generateSeats();
-                modal.style.display = 'flex';
-            });
-        });
-
-        // Close modal
-        closeBtn.addEventListener('click', () => {
+        function closeModal() {
             modal.style.display = 'none';
-        });
+        }
 
-        // Close modal when clicking outside
-        window.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-
-        // Confirm booking
-        confirmBtn.addEventListener('click', () => {
+        function confirmBooking() {
             if (selectedSeats.length === 0) {
-                alert('Pilih setidaknya satu kursi.');
+                alert("Silakan pilih minimal 1 kursi!");
                 return;
             }
-            alert(`Pemesanan berhasil untuk kursi: ${selectedSeats.join(', ')} pada jam ${selectedTimeSpan.textContent}`);
-            modal.style.display = 'none';
-            // Here you can add logic to process the booking
-        });
+            // Di sini nanti bisa disambungkan ke Backend untuk menyimpan transaksi
+            alert("Booking Berhasil!\n\nFilm: {{ $movie->title }}\nJumlah Tiket: " + selectedSeats.length + "\nNomor Kursi: " + selectedSeats.join(', '));
+            closeModal();
+        }
+
+        // Tutup modal jika klik di luar
+        window.onclick = function(event) {
+            if (event.target == modal) closeModal();
+        }
     </script>
 
 </body>

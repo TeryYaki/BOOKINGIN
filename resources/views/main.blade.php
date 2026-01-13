@@ -17,9 +17,7 @@
             --blue-hover: #2563eb;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
@@ -50,7 +48,7 @@
         }
         .navbar nav {
             display: flex;
-            align-items: center; /* Agar sejajar vertikal */
+            align-items: center;
             gap: 1.5rem;
         }
         .navbar a {
@@ -59,235 +57,128 @@
             font-weight: 500;
             transition: .3s;
         }
-        .navbar a:hover {
-            color: var(--blue-primary);
-        }
+        .navbar a:hover { color: var(--blue-primary); }
 
-        /* --- TAMBAHAN STYLE UNTUK USER PROFILE --- */
+        /* User Profile */
         .user-menu {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding-left: 15px;
-            border-left: 1px solid #333; /* Garis pemisah tipis */
+            display: flex; align-items: center; gap: 15px;
+            padding-left: 15px; border-left: 1px solid #333;
         }
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .user-info { display: flex; align-items: center; gap: 10px; }
         .user-avatar {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--blue-primary);
+            width: 35px; height: 35px; border-radius: 50%;
+            object-fit: cover; border: 2px solid var(--blue-primary);
         }
-        .user-name {
-            font-weight: bold;
-            font-size: 0.95rem;
-            color: white;
-        }
+        .user-name { font-weight: bold; font-size: 0.95rem; color: white; }
         .btn-logout {
-            background: #ef4444; /* Warna Merah */
-            color: white;
-            border: none;
-            padding: 6px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
+            background: #ef4444; color: white; border: none;
+            padding: 6px 15px; border-radius: 5px; cursor: pointer;
+            font-weight: bold; transition: 0.3s;
         }
-        .btn-logout:hover {
-            background: #dc2626;
-        }
+        .btn-logout:hover { background: #dc2626; }
 
         /* Hero Styles */
         .hero {
-            margin-top: 70px;
-            height: 70vh;
+            margin-top: 70px; height: 70vh;
             background-image: url('images/the-premiere-1.jpg');
-            background-size: cover;
-            background-position: center;
+            background-size: cover; background-position: center;
             position: relative;
         }
         .hero::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: var(--hero-gradient);
+            content: ""; position: absolute; inset: 0; background: var(--hero-gradient);
         }
         .hero-overlay {
-            position: absolute;
-            bottom: 2rem;
-            left: 2rem;
-            z-index: 2;
+            position: absolute; bottom: 2rem; left: 2rem; z-index: 2;
         }
         .hero-title {
-            font-size: 4rem;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px black;
+            font-size: 4rem; font-weight: bold; text-shadow: 2px 2px 4px black;
         }
 
         /* General Sections */
-        main {
-            padding: 0 2rem;
-        }
-        .section {
-            padding: 3rem 0;
-            max-width: 1200px;
-            margin: auto;
-        }
+        main { padding: 0 2rem; }
+        .section { padding: 3rem 0; max-width: 1200px; margin: auto; }
         .section-title {
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-            width: fit-content;
+            font-size: 2rem; margin-bottom: 1.5rem; width: fit-content;
             border-bottom: 2px solid var(--accent-color);
         }
 
         /* Features Grid */
         .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;
         }
         .feature-card {
-            background: var(--secondary-bg);
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-align: center;
-            transition: .3s;
+            background: var(--secondary-bg); padding: 1.5rem; border-radius: 12px;
+            text-align: center; transition: .3s;
         }
         .feature-card:hover {
-            background: var(--hover-bg);
-            transform: translateY(-6px);
+            background: var(--hover-bg); transform: translateY(-6px);
         }
         .feature-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 10px;
+            width: 100%; height: 200px; object-fit: cover; border-radius: 10px;
         }
 
         /* Movie Section Styles */
         .movie-tabs {
-            display: flex;
-            justify-content: center;
-            gap: 2.5rem;
-            margin-bottom: 2.5rem;
-            border-bottom: 1px solid var(--accent-color);
+            display: flex; justify-content: center; gap: 2.5rem;
+            margin-bottom: 2.5rem; border-bottom: 1px solid var(--accent-color);
             padding-bottom: 5px;
         }
         .movie-tabs .tab {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #888;
-            cursor: pointer;
-            padding: .5rem 1rem;
-            transition: .3s;
-            border-bottom: 3px solid transparent;
+            background: none; border: none; font-size: 1.2rem; font-weight: 600;
+            color: #888; cursor: pointer; padding: .5rem 1rem;
+            transition: .3s; border-bottom: 3px solid transparent;
         }
         .movie-tabs .tab.active {
-            border-bottom: 3px solid var(--blue-primary);
-            color: white;
+            border-bottom: 3px solid var(--blue-primary); color: white;
         }
 
         .movie-carousel {
-            position: relative;
-            display: flex;
-            align-items: center;
-            padding: 0 40px; 
+            position: relative; display: flex; align-items: center; padding: 0 40px; 
         }
         .movie-list {
-            display: flex;
-            gap: 1.5rem; 
-            overflow-x: auto;
-            padding: 1rem 0; 
-            scroll-behavior: smooth;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+            display: flex; gap: 1.5rem; overflow-x: auto; padding: 1rem 0; 
+            scroll-behavior: smooth; -ms-overflow-style: none; scrollbar-width: none;
         }
-        .movie-list::-webkit-scrollbar {
-            display: none;
-        }
+        .movie-list::-webkit-scrollbar { display: none; }
 
+        /* Container Poster */
         .movie-poster-container {
-            position: relative;
-            width: 200px; 
-            height: 300px; 
-            border-radius: 10px;
-            overflow: hidden;
-            flex-shrink: 0;
+            position: relative; width: 200px; height: 300px; 
+            border-radius: 10px; overflow: hidden; flex-shrink: 0;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            transition: transform .3s;
-            cursor: pointer;
+            transition: transform .3s; cursor: pointer;
         }
+        
+        /* FIX GAMBAR AGAR FULL */
         .movie-poster-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
+            width: 100%; height: 100%; object-fit: fill; display: block;
         }
 
         .movie-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0; 
-            transition: opacity 0.3s ease;
-            z-index: 5;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); display: flex;
+            justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.3s ease; z-index: 5;
         }
-        .movie-poster-container:hover {
-            transform: scale(1.05); 
-        }
-        .movie-poster-container:hover .movie-overlay {
-            opacity: 1; 
-        }
+        .movie-poster-container:hover { transform: scale(1.05); }
+        .movie-poster-container:hover .movie-overlay { opacity: 1; }
 
         .book-now-btn {
-            background-color: var(--blue-primary);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1rem;
+            background-color: var(--blue-primary); color: white;
+            padding: 0.75rem 1.5rem; border: none; border-radius: 6px;
+            text-decoration: none; font-weight: bold; font-size: 1rem;
             transition: background-color 0.2s;
         }
-        .book-now-btn:hover {
-            background-color: var(--blue-hover);
-        }
+        .book-now-btn:hover { background-color: var(--blue-hover); }
 
         .carousel-btn {
-            background: var(--blue-primary);
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            width: 50px; 
-            height: 50px; 
-            border-radius: 50%; 
-            cursor: pointer;
-            position: absolute;
-            z-index: 10;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            transition: .2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0; 
+            background: var(--blue-primary); border: none; color: white;
+            font-size: 1.5rem; width: 50px; height: 50px; border-radius: 50%; 
+            cursor: pointer; position: absolute; z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5); transition: .2s;
+            display: flex; align-items: center; justify-content: center; padding: 0; 
         }
-        .carousel-btn:hover {
-            background: var(--blue-hover);
-        }
+        .carousel-btn:hover { background: var(--blue-hover); }
         .carousel-btn.left { left: 0; }
         .carousel-btn.right { right: 0; }
         
@@ -301,10 +192,7 @@
         .hidden { display: none; }
 
         footer {
-            background: black;
-            padding: 1.5rem;
-            text-align: center;
-            color: #888;
+            background: black; padding: 1.5rem; text-align: center; color: #888;
         }
     </style>
 </head>
@@ -319,8 +207,8 @@
 
         {{-- LOGIKA: Jika Belum Login (Guest) --}}
         @guest
-            <a href="{{ route('register') }}" aria-label="register">Daftar</a>
-            <a href="{{ route('login') }}" aria-label="login">Login</a>
+            <a href="{{ route('register') }}" aria-label="register" style="background:#e50914; padding:5px 15px; border-radius:5px;">Daftar</a>
+            <a href="{{ route('login') }}" aria-label="login" style="background:#3b82f6; padding:5px 15px; border-radius:5px;">Login</a>
         @endguest
 
         {{-- LOGIKA: Jika Sudah Login (Auth) --}}
@@ -362,47 +250,16 @@
         <button class="carousel-btn left" onclick="scrollMovies('movieList', -1)">&#10094;</button>
   
         <div class="movie-list" id="movieList">
-            {{-- FILM 1-10 (Now Showing) --}}
-            <div class="movie-poster-container">
-                <img src="images/poster6.jpg" alt="Poster Film 1">
-                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
-            </div>
-            <div class="movie-poster-container">
-                <img src="images/poster2.jpg" alt="Poster Film 2">
-                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
-            </div>
-            <div class="movie-poster-container">
-                <img src="images/poster3.jpg" alt="Poster Film 3">
-                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
-            </div>
-            <div class="movie-poster-container">
-                <img src="images/poster4.jpg" alt="Poster Film 4">
-                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
-            </div>
-            <div class="movie-poster-container">
-                <img src="images/poster5.jpg" alt="Poster Film 5">
-                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
-            </div>
-            <div class="movie-poster-container">
-                <img src="images/poster1.jpg" alt="Poster Film 6">
-                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
-            </div>
-            <div class="movie-poster-container">
-                <img src="images/poster7.jpg" alt="Poster Film 7">
-                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
-            </div>
-            <div class="movie-poster-container">
-                <img src="images/poster8.jpg" alt="Poster Film 8">
-                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
-            </div>
-            <div class="movie-poster-container">
-                <img src="images/poster9.jpg" alt="Poster Film 9">
-                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
-            </div>
-            <div class="movie-poster-container">
-                <img src="images/poster10.jpg" alt="Poster Film 10">
-                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
-            </div>
+            @forelse($nowShowing as $movie)
+                <div class="movie-poster-container">
+                    <img src="{{ asset($movie->poster_path) }}" alt="{{ $movie->title }}">
+                    <div class="movie-overlay">
+                        <a href="{{ route('film', $movie->id) }}" class="book-now-btn">Book Now</a>
+                    </div>
+                </div>
+            @empty
+                <div style="padding: 20px; color: white;">Belum ada film yang tayang.</div>
+            @endforelse
         </div>
 
         <button class="carousel-btn right" onclick="scrollMovies('movieList', 1)">&#10095;</button>
@@ -412,27 +269,16 @@
         <button class="carousel-btn left" onclick="scrollMovies('upcomingMovieList', -1)">&#10094;</button>
 
         <div class="movie-list" id="upcomingMovieList">
-            {{-- FILM 11-15 (Upcoming) --}}
-            <div class="movie-poster-container">
-                <img src="images/poster11.jpg" alt="Poster Film 11">
-                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
-            </div>
-            <div class="movie-poster-container">
-                <img src="images/poster12.jpg" alt="Poster Film 12">
-                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
-            </div>
-            <div class="movie-poster-container">
-                <img src="images/poster13.jpg" alt="Poster Film 13">
-                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
-            </div>
-            <div class="movie-poster-container">
-                <img src="images/poster14.jpg" alt="Poster Film 14">
-                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
-            </div>
-            <div class="movie-poster-container">
-                <img src="images/poster15.jpg" alt="Poster Film 15">
-                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
-            </div>
+            @forelse($upcoming as $movie)
+                <div class="movie-poster-container">
+                    <img src="{{ asset($movie->poster_path) }}" alt="{{ $movie->title }}">
+                    <div class="movie-overlay">
+                        <span class="book-now-btn" style="background: #555; cursor: default;">Coming Soon</span>
+                    </div>
+                </div>
+            @empty
+                <div style="padding: 20px; color: white;">Belum ada film upcoming.</div>
+            @endforelse
         </div>
 
         <button class="carousel-btn right" onclick="scrollMovies('upcomingMovieList', 1)">&#10095;</button>
