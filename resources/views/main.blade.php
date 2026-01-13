@@ -29,7 +29,7 @@
             line-height: 1.6;
         }
 
-        /* Navbar Styles (Sudah Rapi) */
+        /* Navbar Styles */
         header.navbar {
             display: flex;
             justify-content: space-between;
@@ -50,6 +50,7 @@
         }
         .navbar nav {
             display: flex;
+            align-items: center; /* Agar sejajar vertikal */
             gap: 1.5rem;
         }
         .navbar a {
@@ -59,7 +60,46 @@
             transition: .3s;
         }
         .navbar a:hover {
-            color: #f0f0f0;
+            color: var(--blue-primary);
+        }
+
+        /* --- TAMBAHAN STYLE UNTUK USER PROFILE --- */
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-left: 15px;
+            border-left: 1px solid #333; /* Garis pemisah tipis */
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--blue-primary);
+        }
+        .user-name {
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: white;
+        }
+        .btn-logout {
+            background: #ef4444; /* Warna Merah */
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-logout:hover {
+            background: #dc2626;
         }
 
         /* Hero Styles */
@@ -129,7 +169,7 @@
             border-radius: 10px;
         }
 
-        /* --- MOVIE SECTION STYLES --- */
+        /* Movie Section Styles */
         .movie-tabs {
             display: flex;
             justify-content: center;
@@ -173,7 +213,6 @@
             display: none;
         }
 
-        /* Container Poster (Membungkus Gambar dan Overlay) */
         .movie-poster-container {
             position: relative;
             width: 200px; 
@@ -192,7 +231,6 @@
             display: block;
         }
 
-        /* STYLE OVERLAY DAN TOMBOL */
         .movie-overlay {
             position: absolute;
             top: 0;
@@ -203,15 +241,15 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            opacity: 0; /* Sembunyikan secara default */
+            opacity: 0; 
             transition: opacity 0.3s ease;
             z-index: 5;
         }
         .movie-poster-container:hover {
-            transform: scale(1.05); /* Efek zoom saat hover */
+            transform: scale(1.05); 
         }
         .movie-poster-container:hover .movie-overlay {
-            opacity: 1; /* Tampilkan overlay saat hover */
+            opacity: 1; 
         }
 
         .book-now-btn {
@@ -229,7 +267,6 @@
             background-color: var(--blue-hover);
         }
 
-        /* Tombol Carousel */
         .carousel-btn {
             background: var(--blue-primary);
             border: none;
@@ -248,32 +285,21 @@
             justify-content: center;
             padding: 0; 
         }
-
         .carousel-btn:hover {
             background: var(--blue-hover);
         }
-
-        .carousel-btn.left {
-            left: 0; 
-        }
-
-        .carousel-btn.right {
-            right: 0; 
-        }
+        .carousel-btn.left { left: 0; }
+        .carousel-btn.right { right: 0; }
         
         @media (max-width: 768px) {
-            .movie-carousel {
-                padding: 0 10px; 
-            }
+            .movie-carousel { padding: 0 10px; }
             .carousel-btn.left { left: 0px; }
             .carousel-btn.right { right: 0px; }
+            .user-menu { flex-direction: column; align-items: flex-start; border-left: none; padding-left: 0; }
         }
 
-        .hidden {
-            display: none;
-        }
+        .hidden { display: none; }
 
-        /* Footer */
         footer {
             background: black;
             padding: 1.5rem;
@@ -288,12 +314,32 @@
 <header class="navbar">
     <div class="logo">BOOKINGIN</div>
     <nav>
-        <a href="{{ route('home') }}" aria-label="Beranda">Beranda</a>
-        <a href="{{ route('register') }}" aria-label="register">Daftar</a>
-        <a href="{{ route('login') }}" aria-label="login">Login</a>
+        <a href="{{ url('/') }}" aria-label="Beranda">Beranda</a>
         <a href="{{ route('movies') }}" aria-label="Movies">Movies</a>
-    </nav>
 
+        {{-- LOGIKA: Jika Belum Login (Guest) --}}
+        @guest
+            <a href="{{ route('register') }}" aria-label="register">Daftar</a>
+            <a href="{{ route('login') }}" aria-label="login">Login</a>
+        @endguest
+
+        {{-- LOGIKA: Jika Sudah Login (Auth) --}}
+        @auth
+            <div class="user-menu">
+                <div class="user-info">
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=3b82f6&color=fff&size=128" 
+                         alt="User Profile" 
+                         class="user-avatar">
+                    <span class="user-name">{{ Auth::user()->name }}</span>
+                </div>
+                
+                <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+                    @csrf
+                    <button type="submit" class="btn-logout">Keluar</button>
+                </form>
+            </div>
+        @endauth
+    </nav>
 </header>
 
 <div class="hero">
@@ -305,7 +351,6 @@
 <main>
 
 <section class="section movie-section">
-
     <h2 class="section-title" style="margin:auto; text-align:center; margin-bottom: 3rem;">Choose Your Movie</h2>
 
     <div class="movie-tabs">
@@ -317,75 +362,46 @@
         <button class="carousel-btn left" onclick="scrollMovies('movieList', -1)">&#10094;</button>
   
         <div class="movie-list" id="movieList">
-            
+            {{-- FILM 1-10 (Now Showing) --}}
             <div class="movie-poster-container">
                 <img src="images/poster6.jpg" alt="Poster Film 1">
-                <div class="movie-overlay">
-                    <a href="{{ route('film') }}" class="book-now-btn">Book Now</a>
-                </div>
+                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
             </div>
-
             <div class="movie-poster-container">
                 <img src="images/poster2.jpg" alt="Poster Film 2">
-                <div class="movie-overlay">
-                    <a href="booking.html?movie=2" class="book-now-btn">Book Now</a>
-                </div>
+                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
             </div>
-
             <div class="movie-poster-container">
                 <img src="images/poster3.jpg" alt="Poster Film 3">
-                <div class="movie-overlay">
-                    <a href="booking.html?movie=3" class="book-now-btn">Book Now</a>
-                </div>
+                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
             </div>
-
             <div class="movie-poster-container">
                 <img src="images/poster4.jpg" alt="Poster Film 4">
-                <div class="movie-overlay">
-                    <a href="booking.html?movie=4" class="book-now-btn">Book Now</a>
-                </div>
+                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
             </div>
-
             <div class="movie-poster-container">
                 <img src="images/poster5.jpg" alt="Poster Film 5">
-                <div class="movie-overlay">
-                    <a href="booking.html?movie=5" class="book-now-btn">Book Now</a>
-                </div>
+                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
             </div>
-            
             <div class="movie-poster-container">
                 <img src="images/poster1.jpg" alt="Poster Film 6">
-                <div class="movie-overlay">
-                    <a href="{{ route('film') }}" class="book-now-btn">Book Now</a>
-                </div>
+                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
             </div>
-            
             <div class="movie-poster-container">
                 <img src="images/poster7.jpg" alt="Poster Film 7">
-                <div class="movie-overlay">
-                    <a href="booking.html?movie=7" class="book-now-btn">Book Now</a>
-                </div>
+                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
             </div>
-            
             <div class="movie-poster-container">
                 <img src="images/poster8.jpg" alt="Poster Film 8">
-                <div class="movie-overlay">
-                    <a href="booking.html?movie=8" class="book-now-btn">Book Now</a>
-                </div>
+                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
             </div>
-            
             <div class="movie-poster-container">
                 <img src="images/poster9.jpg" alt="Poster Film 9">
-                <div class="movie-overlay">
-                    <a href="booking.html?movie=9" class="book-now-btn">Book Now</a>
-                </div>
+                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
             </div>
-            
             <div class="movie-poster-container">
                 <img src="images/poster10.jpg" alt="Poster Film 10">
-                <div class="movie-overlay">
-                    <a href="booking.html?movie=10" class="book-now-btn">Book Now</a>
-                </div>
+                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
             </div>
         </div>
 
@@ -396,39 +412,26 @@
         <button class="carousel-btn left" onclick="scrollMovies('upcomingMovieList', -1)">&#10094;</button>
 
         <div class="movie-list" id="upcomingMovieList">
+            {{-- FILM 11-15 (Upcoming) --}}
             <div class="movie-poster-container">
                 <img src="images/poster11.jpg" alt="Poster Film 11">
-                <div class="movie-overlay">
-                    <a href="booking.html?movie=11" class="book-now-btn">Book Now</a>
-                </div>
+                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
             </div>
-            
             <div class="movie-poster-container">
                 <img src="images/poster12.jpg" alt="Poster Film 12">
-                <div class="movie-overlay">
-                    <a href="booking.html?movie=12" class="book-now-btn">Book Now</a>
-                </div>
+                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
             </div>
-            
             <div class="movie-poster-container">
                 <img src="images/poster13.jpg" alt="Poster Film 13">
-                <div class="movie-overlay">
-                    <a href="booking.html?movie=13" class="book-now-btn">Book Now</a>
-                </div>
+                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
             </div>
-            
             <div class="movie-poster-container">
                 <img src="images/poster14.jpg" alt="Poster Film 14">
-                <div class="movie-overlay">
-                    <a href="booking.html?movie=14" class="book-now-btn">Book Now</a>
-                </div>
+                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
             </div>
-            
             <div class="movie-poster-container">
                 <img src="images/poster15.jpg" alt="Poster Film 15">
-                <div class="movie-overlay">
-                    <a href="booking.html?movie=15" class="book-now-btn">Book Now</a>
-                </div>
+                <div class="movie-overlay"><a href="#" class="book-now-btn">Book Now</a></div>
             </div>
         </div>
 
@@ -477,17 +480,14 @@
 
 <script>
 function showTab(type) {
-    // Hapus class active dari semua tab
     const tabs = document.querySelectorAll(".tab");
     tabs.forEach(btn => btn.classList.remove("active"));
     
     if (type === "now") {
-        // Aktifkan tab Now Showing
         tabs[0].classList.add("active");
         document.getElementById("nowShowing").classList.remove("hidden");
         document.getElementById("upcomingMovies").classList.add("hidden");
     } else {
-        // Aktifkan tab Upcoming
         tabs[1].classList.add("active");
         document.getElementById("upcomingMovies").classList.remove("hidden");
         document.getElementById("nowShowing").classList.add("hidden");
@@ -496,7 +496,6 @@ function showTab(type) {
 
 function scrollMovies(listId, direction) {
     const list = document.getElementById(listId);
-    // Scroll 3 poster sekaligus (200px * 3 + gap 24px * 2 = 648px)
     const scrollAmount = 648 * direction;
     list.scrollBy({ left: scrollAmount, behavior: "smooth" });
 }

@@ -3,37 +3,55 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
-// Halaman Utama
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Di sini kita mendaftarkan semua jalur aplikasi.
+| Perhatikan bagian ->name('...'), itu kuncinya agar {{ route(...) }} berfungsi.
+|
+*/
+
+// 1. Halaman Depan (Beranda)
 Route::get('/', function () {
     return view('main');
-})->name('home');
+})->name('home'); // <-- Nama ini dipanggil di navbar "Beranda"
 
-// Halaman Film
-Route::get('/movies', function () { return view('movies'); })->name('movies');
-Route::get('/film', function () { return view('film'); })->name('film');
+// 2. Halaman Daftar Film
+Route::get('/movies', function () {
+    return view('movies'); // Pastikan file movies.blade.php ada
+})->name('movies');
 
-// --- AUTH ROUTE ---
+// 3. Halaman Detail Film (Untuk tombol "Book Now")
+Route::get('/film', function () {
+    return view('film'); // Pastikan file film.blade.php ada
+})->name('film');
 
-// Menampilkan Halaman (Blade)
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 
-// Proses Ajax dari Firebase (Javascript mengirim ke sini)
+// --- AREA AUTHENTICATION (Login & Register) ---
+
+// Halaman Login
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login'); // <-- Nama ini dipanggil di navbar "Login"
+
+// Halaman Register
+Route::get('/register', function () {
+    return view('auth.register');
+})->name('register'); // <-- Nama ini dipanggil di navbar "Daftar"
+
+
+// --- LOGIKA BACKEND (Firebase & Logout) ---
+
+// Proses Login & Register (Menerima data dari Javascript)
 Route::post('/login-firebase', [AuthController::class, 'firebaseLogin']);
 Route::post('/register-firebase', [AuthController::class, 'firebaseRegister']);
 
-// Logout
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+// Proses Logout (Tombol Keluar)
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Contoh Halaman Khusus Admin (Opsional)
-Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        return "Halo " . Auth::user()->name . ", Role Anda: " . Auth::user()->role;
-    });
-    
-    // Route khusus Admin
-    Route::get('/admin/dashboard', function() {
-        if(Auth::user()->role !== 'admin') return redirect('/');
-        return "Selamat Datang di Halaman Admin";
-    });
-});
+// Halaman Admin (Opsional, jika Anda punya)
+Route::get('/admin/dashboard', function () {
+    return view('admin.dashboard');
+})->middleware(['auth']); // Hanya bisa diakses jika sudah login
