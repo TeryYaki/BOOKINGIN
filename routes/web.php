@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Models\Movie;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\ProfileController;
 
 // Route Public
 Route::get('/', function () {
@@ -45,5 +47,9 @@ Route::middleware(['auth', 'is_admin'])->group(function () {
     Route::delete('/admin/movie/{id}', [AdminController::class, 'destroy'])->name('admin.delete');
 });
 
-// --- BAGIAN INI KITA KOSONGKAN DULU AGAR TIDAK ERROR ---
-// Nanti kita isi lagi setelah Middleware jadi.
+Route::middleware(['auth'])->group(function () {
+    Route::post('/booking/process', [BookingController::class, 'process'])->name('booking.process');
+    Route::get('/payment', [BookingController::class, 'showPayment'])->name('payment.show');
+    Route::get('/payment/success', [BookingController::class, 'success'])->name('payment.success');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+});

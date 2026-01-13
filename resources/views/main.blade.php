@@ -202,8 +202,8 @@
 <header class="navbar">
     <div class="logo">BOOKINGIN</div>
     <nav>
-        <a href="{{ url('/') }}" aria-label="Beranda">Beranda</a>
-        <a href="{{ route('movies') }}" aria-label="Movies">Movies</a>
+        <a href="{{ route('home') }}" style="color:#3b82f6;">Beranda</a>
+        <a href="{{ route('movies') }}">Movies</a>
 
         {{-- LOGIKA: Jika Belum Login (Guest) --}}
         @guest
@@ -218,7 +218,9 @@
                     <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=3b82f6&color=fff&size=128" 
                          alt="User Profile" 
                          class="user-avatar">
-                    <span class="user-name">{{ Auth::user()->name }}</span>
+                    <a href="{{ route('profile') }}" class="user-name" style="color: white; text-decoration: none; font-weight: bold;">
+                        {{ Auth::user()->name }}
+                    </a>
                 </div>
                 
                 <form action="{{ route('logout') }}" method="POST" style="display:inline;">
