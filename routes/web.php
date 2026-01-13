@@ -1,29 +1,39 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
-// Halaman utama (main page)
+// Halaman Utama
 Route::get('/', function () {
     return view('main');
 })->name('home');
 
-// Halaman Login
-Route::get('/login', function () {
-    return view('auth.login'); // resources/views/auth/login.blade.php
-})->name('login');
+// Halaman Film
+Route::get('/movies', function () { return view('movies'); })->name('movies');
+Route::get('/film', function () { return view('film'); })->name('film');
 
-// Halaman Register
-Route::get('/register', function () {
-    return view('auth.register'); // resources/views/auth/register.blade.php
-})->name('register');
+// --- AUTH ROUTE ---
 
-// Halaman film baru
-Route::get('/movies', function () {
-    return view('movies');
-})->name('movies');
+// Menampilkan Halaman (Blade)
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 
-Route::get('/film', function () {
-    return view('film'); // resources/views/film.blade.php
-})->name('film');
+// Proses Ajax dari Firebase (Javascript mengirim ke sini)
+Route::post('/login-firebase', [AuthController::class, 'firebaseLogin']);
+Route::post('/register-firebase', [AuthController::class, 'firebaseRegister']);
 
-Route::post('/register-firebase', [App\Http\Controllers\AuthController::class, 'firebaseRegister']);
+// Logout
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Contoh Halaman Khusus Admin (Opsional)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', function () {
+        return "Halo " . Auth::user()->name . ", Role Anda: " . Auth::user()->role;
+    });
+    
+    // Route khusus Admin
+    Route::get('/admin/dashboard', function() {
+        if(Auth::user()->role !== 'admin') return redirect('/');
+        return "Selamat Datang di Halaman Admin";
+    });
+});
