@@ -12,22 +12,18 @@ class ProfileController extends Controller
 
     public function __construct()
     {
+        // Koneksi ke Firebase (Sama seperti BookingController)
         $serviceAccountPath = base_path('firebase_credentials.json');
 
         if (file_exists($serviceAccountPath)) {
-            // URL DATABASE YANG BENAR (SUDAH DIPERBAIKI)
-            // Pastikan URL ini SAMA PERSIS dengan yang ada di BookingController
-            $databaseUri = 'https://bookingin-eb994-default-rtdb.asia-southeast1.firebasedatabase.app/'; 
+            // GANTI URL INI DENGAN URL DATABASE ANDA
+            $databaseUri = 'https://bookingin-eb994-default-rtdb.asia-southeast1.firebasedatabase.app/';
 
-            try {
-                $factory = (new Factory)
-                    ->withServiceAccount($serviceAccountPath)
-                    ->withDatabaseUri($databaseUri);
-                
-                $this->firebaseDatabase = $factory->createDatabase();
-            } catch (\Throwable $e) {
-                $this->firebaseDatabase = null;
-            }
+            $factory = (new Factory)
+                ->withServiceAccount($serviceAccountPath)
+                ->withDatabaseUri($databaseUri);
+            
+            $this->firebaseDatabase = $factory->createDatabase();
         } else {
             $this->firebaseDatabase = null;
         }
@@ -39,20 +35,19 @@ class ProfileController extends Controller
         $tickets = [];
 
         if ($this->firebaseDatabase) {
-            // Logika ID User (SAMA DENGAN BOOKING CONTROLLER)
             $userId = $user->firebase_uid ?? 'user_' . $user->id;
 
-            try {
-                // Ambil data dari path yang benar
+            // --- HAPUS TRY/CATCH, BIARKAN ERROR MUNCUL ---
+            // try {
                 $reference = $this->firebaseDatabase->getReference('tickets/' . $userId);
-                $snapshot = $reference->getValue();
+                $snapshot = $reference->getValue(); // <--- Jika SSL Error, ini akan meledak dan menampilkan pesan di layar
 
                 if ($snapshot) {
                     $tickets = collect($snapshot)->sortByDesc('timestamp');
                 }
-            } catch (\Exception $e) {
-                // Diamkan error jika gagal ambil data
-            }
+            // } catch (\Exception $e) {
+            //    // Diamkan error
+            // }
         }
 
         return view('profile', compact('user', 'tickets'));
