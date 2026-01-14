@@ -15,8 +15,9 @@ class ProfileController extends Controller
         $serviceAccountPath = base_path('firebase_credentials.json');
 
         if (file_exists($serviceAccountPath)) {
-            // PASTIKAN URL INI SAMA DENGAN YANG ADA DI BOOKING CONTROLLER
-            $databaseUri = 'https://bookingin-1b326-default-rtdb.asia-southeast1.firebasedatabase.app/'; 
+            // URL DATABASE YANG BENAR (SUDAH DIPERBAIKI)
+            // Pastikan URL ini SAMA PERSIS dengan yang ada di BookingController
+            $databaseUri = 'https://bookingin-eb994-default-rtdb.asia-southeast1.firebasedatabase.app/'; 
 
             try {
                 $factory = (new Factory)
@@ -38,23 +39,19 @@ class ProfileController extends Controller
         $tickets = [];
 
         if ($this->firebaseDatabase) {
-            // --- PERBAIKAN DI SINI ---
-            // Kita gunakan logika yang sama dengan BookingController:
-            // Jika firebase_uid ada, pakai itu. Jika tidak, pakai "user_ID" dari database MySQL.
+            // Logika ID User (SAMA DENGAN BOOKING CONTROLLER)
             $userId = $user->firebase_uid ?? 'user_' . $user->id;
 
             try {
-                // Ambil data dari path: tickets/user_1
+                // Ambil data dari path yang benar
                 $reference = $this->firebaseDatabase->getReference('tickets/' . $userId);
-                
                 $snapshot = $reference->getValue();
 
                 if ($snapshot) {
-                    // Urutkan dari yang terbaru (berdasarkan timestamp)
                     $tickets = collect($snapshot)->sortByDesc('timestamp');
                 }
             } catch (\Exception $e) {
-                // Jika error, biarkan kosong agar halaman tidak crash
+                // Diamkan error jika gagal ambil data
             }
         }
 

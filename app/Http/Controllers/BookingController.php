@@ -13,14 +13,12 @@ class BookingController extends Controller
 
     public function __construct()
     {
-        // 1. Cek File Credentials
         $serviceAccountPath = base_path('firebase_credentials.json');
 
         if (file_exists($serviceAccountPath)) {
-            // --- PENTING: PASTIKAN URL INI BENAR ---
-            // Cek di Firebase Console > Realtime Database
+            // URL DATABASE YANG BENAR (SUDAH DIPERBAIKI)
             $databaseUri = 'https://bookingin-eb994-default-rtdb.asia-southeast1.firebasedatabase.app/'; 
-
+            
             try {
                 $factory = (new Factory)
                     ->withServiceAccount($serviceAccountPath)
@@ -28,7 +26,6 @@ class BookingController extends Controller
                 
                 $this->firebaseDatabase = $factory->createDatabase();
             } catch (\Throwable $e) {
-                // Jangan die dulu di sini, nanti dicek saat mau simpan
                 $this->firebaseDatabase = null;
             }
         } else {
@@ -36,7 +33,6 @@ class BookingController extends Controller
         }
     }
 
-    // 1. PROSES HITUNG HARGA (Simpan ke Session)
     public function process(Request $request)
     {
         $request->validate([
@@ -63,7 +59,6 @@ class BookingController extends Controller
         return redirect()->route('payment.show')->with('booking', $bookingData);
     }
 
-    // 2. HALAMAN PEMBAYARAN
     public function showPayment()
     {
         $booking = session('booking');
@@ -71,7 +66,6 @@ class BookingController extends Controller
         return view('payment', compact('booking'));
     }
 
-    // 3. SUKSES BAYAR (HANYA FIREBASE)
     public function success()
     {
         $booking = session('booking');
@@ -82,12 +76,12 @@ class BookingController extends Controller
 
         $user = Auth::user();
 
-        // Cek Koneksi Firebase
+        // Cek Koneksi
         if (!$this->firebaseDatabase) {
-            dd("ERROR: Tidak dapat terhubung ke Firebase. Cek apakah file 'firebase_credentials.json' ada di folder project utama, atau URL Database salah.");
+            dd("ERROR: Tidak dapat terhubung ke Firebase. Cek file 'firebase_credentials.json' atau URL Database.");
         }
 
-        // Gunakan ID manual jika firebase_uid kosong
+        // Logika ID User (Harus sama dengan ProfileController)
         $userId = $user->firebase_uid ?? 'user_' . $user->id;
 
         $firebaseData = [
@@ -103,17 +97,15 @@ class BookingController extends Controller
         ];
 
         try {
-            // MENYIMPAN KE FIREBASE
+            // Simpan Data
             $this->firebaseDatabase
                  ->getReference('tickets/' . $userId . '/' . $booking['order_id'])
                  ->set($firebaseData);
                  
         } catch (\Throwable $e) {
-            // JIKA GAGAL, TAMPILKAN ERROR DI LAYAR AGAR TAHU PENYEBABNYA
             dd("GAGAL SIMPAN KE FIREBASE: " . $e->getMessage());
         }
 
-        // Jika berhasil lewat sini, hapus session dan tampilkan tiket
         $finalTicket = $booking;
         session()->forget('booking');
 
