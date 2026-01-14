@@ -61,6 +61,10 @@
         .schedule-box { max-width: 900px; margin: 0 auto; background: #1b1b1b; border: 1px solid #333; border-radius: 12px; padding: 30px; }
         .section-title { font-size: 20px; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px; color: #3b82f6; }
         
+        /* Dropdown Kota Style */
+        .city-select { width: 100%; max-width: 400px; padding: 12px; background: #333; color: white; border: 1px solid #555; border-radius: 6px; font-size: 16px; margin-bottom: 20px; cursor: pointer; }
+        .city-select:focus { outline: none; border-color: #3b82f6; }
+
         .time-btn { padding: 10px 25px; background: transparent; border: 1px solid #555; color: white; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; margin-right: 10px; margin-bottom: 10px; }
         .time-btn:hover { background: #3b82f6; border-color: #3b82f6; transform: translateY(-2px); }
 
@@ -145,7 +149,19 @@
             <div class="section-title">Jadwal Tayang (Regular 2D) - Rp 45.000</div>
             
             @if($movie->status == 'now_showing')
+                <div style="margin-bottom: 20px;">
+                    <label style="color:#aaa; display:block; margin-bottom:10px; font-weight:bold;">Pilih Lokasi Bioskop:</label>
+                    <select id="regionSelect" class="city-select">
+                        <option value="Jakarta">Jakarta - Grand Indonesia</option>
+                        <option value="Bandung">Bandung - Trans Studio</option>
+                        <option value="Surabaya">Surabaya - Tunjungan Plaza</option>
+                        <option value="Yogyakarta">Yogyakarta - Ambarrukmo</option>
+                        <option value="Medan">Medan - Centre Point</option>
+                    </select>
+                </div>
+
                 <div>
+                    <label style="color:#aaa; display:block; margin-bottom:10px; font-weight:bold;">Pilih Jam Tayang:</label>
                     <button class="time-btn" onclick="openModal('13:00')">13:00</button>
                     <button class="time-btn" onclick="openModal('15:30')">15:30</button>
                     <button class="time-btn" onclick="openModal('18:00')">18:00</button>
@@ -185,7 +201,7 @@
         <input type="hidden" name="movie_id" value="{{ $movie->id }}">
         <input type="hidden" name="seats" id="seatsInput">
         <input type="hidden" name="time" id="timeInput">
-    </form>
+        <input type="hidden" name="region" id="regionInput"> </form>
 
     <script>
         const modal = document.getElementById('seatModal');
@@ -235,9 +251,13 @@
                 return;
             }
 
+            // Ambil data Region dari Dropdown UI
+            const region = document.getElementById('regionSelect').value;
+
             // Isi input tersembunyi
             document.getElementById('seatsInput').value = selectedSeats.join(',');
             document.getElementById('timeInput').value = selectedTime;
+            document.getElementById('regionInput').value = region; // Masukkan ke form hidden
             
             // Kirim form
             document.getElementById('bookingForm').submit();

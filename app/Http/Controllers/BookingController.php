@@ -10,15 +10,14 @@ use Kreait\Firebase\Factory;
 class BookingController extends Controller
 {
     protected $firebaseDatabase;
-    protected $connectionError; // Variabel baru untuk menampung pesan error
+    protected $connectionError;
 
     public function __construct()
     {
-        // 1. Cek File Credentials
         $serviceAccountPath = base_path('firebase_credentials.json');
 
         if (file_exists($serviceAccountPath)) {
-            // URL Database (Pastikan ini benar dari Firebase Console Anda)
+            // URL Database Anda
             $databaseUri = 'https://bookingin-eb994-default-rtdb.asia-southeast1.firebasedatabase.app/'; 
 
             try {
@@ -28,23 +27,24 @@ class BookingController extends Controller
                 
                 $this->firebaseDatabase = $factory->createDatabase();
             } catch (\Throwable $e) {
-                // TANGKAP ERRORNYA, JANGAN DIABAIKAN
                 $this->firebaseDatabase = null;
-                $this->connectionError = "Gagal Inisialisasi Firebase: " . $e->getMessage();
+                $this->connectionError = $e->getMessage();
             }
         } else {
             $this->firebaseDatabase = null;
-            $this->connectionError = "File 'firebase_credentials.json' TIDAK DITEMUKAN di: " . $serviceAccountPath;
+            $this->connectionError = "File credential tidak ditemukan.";
         }
     }
 
-    // 1. PROSES HITUNG HARGA
+    // 1. PROSES DATA (VALIDASI & SESSION)
     public function process(Request $request)
     {
+        // Validasi input region juga
         $request->validate([
             'movie_id' => 'required',
             'seats' => 'required',
-            'time' => 'required'
+            'time' => 'required',
+            'region' => 'required' // <--- Tambahan Validasi
         ]);
 
         $movie = Movie::findOrFail($request->movie_id);
@@ -57,18 +57,18 @@ class BookingController extends Controller
             'poster' => $movie->poster_path,
             'seats' => $seats,
             'time' => $request->time,
+            'region' => $request->region, // <--- Simpan Kota ke Data
             'total_price' => $totalPrice,
             'order_id' => 'TIX-' . strtoupper(uniqid()), 
             'created_at' => now()->toDateTimeString()
         ];
 
-        // PERBAIKAN: Gunakan session() agar data tidak hilang saat refresh/pindah halaman
+        // Simpan ke Session
         session(['booking' => $bookingData]);
 
         return redirect()->route('payment.show');
     }
 
-    // 2. HALAMAN PEMBAYARAN
     public function showPayment()
     {
         $booking = session('booking');
@@ -76,7 +76,7 @@ class BookingController extends Controller
         return view('payment', compact('booking'));
     }
 
-    // 3. SUKSES BAYAR
+    // 2. SUKSES BAYAR (KIRIM KE FIREBASE)
     public function success()
     {
         $booking = session('booking');
@@ -85,10 +85,8 @@ class BookingController extends Controller
             return redirect('/')->with('error', 'Sesi habis.');
         }
 
-        // --- DETEKTIF ERROR BEKERJA DI SINI ---
         if (!$this->firebaseDatabase) {
-            // Tampilkan pesan error spesifik yang kita simpan di __construct tadi
-            dd("STOP! Gagal Konek ke Firebase. Penyebab: " . $this->connectionError);
+            dd("GAGAL KONEK FIREBASE: " . $this->connectionError);
         }
 
         $user = Auth::user();
@@ -99,6 +97,7 @@ class BookingController extends Controller
             'movie_title' => $booking['movie_title'],
             'seats' => $booking['seats'],
             'time' => $booking['time'],
+            'region' => $booking['region'], // <--- Kirim Kota ke Firebase
             'price' => $booking['total_price'],
             'user_name' => $user->name,
             'user_email' => $user->email,
@@ -107,7 +106,6 @@ class BookingController extends Controller
         ];
 
         try {
-            // Simpan ke Firebase
             $this->firebaseDatabase
                  ->getReference('tickets/' . $userId . '/' . $booking['order_id'])
                  ->set($firebaseData);
@@ -116,7 +114,6 @@ class BookingController extends Controller
             dd("GAGAL SIMPAN (Write Error): " . $e->getMessage());
         }
 
-        // Hapus session dan tampilkan tiket
         $finalTicket = $booking;
         session()->forget('booking');
 
