@@ -4,27 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bookingin – Main Page</title>
-
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-bg: #111;
-            --secondary-bg: #1b1b1b;
-            --hover-bg: #262626;
-            --text-color: white;
-            --accent-color: #444;
-            --hero-gradient: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8));
+            --primary-bg: #0f0f0f;
+            --secondary-bg: #1a1a1a;
+            --hover-bg: #2a2a2a;
+            --text-color: #ffffff;
+            --accent-color: #444444;
+            --hero-gradient: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.9));
             --blue-primary: #3b82f6;
             --blue-hover: #2563eb;
+            --red-primary: #ef4444;
+            --red-hover: #dc2626;
+            --gray-light: #888888;
+            --shadow: 0 4px 12px rgba(0,0,0,0.5);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
         }
 
         * { box-sizing: border-box; }
 
         body {
             margin: 0;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Roboto', sans-serif;
             background: var(--primary-bg);
             color: var(--text-color);
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
         /* Navbar Styles */
@@ -32,19 +39,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: black;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
             padding: 1rem 2rem;
             position: fixed;
             top: 0;
             width: 100%;
             z-index: 100;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            box-shadow: var(--shadow);
+            border-bottom: 1px solid var(--accent-color);
         }
         .navbar .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
+            font-size: 1.8rem;
+            font-weight: 700;
             color: var(--text-color);
             letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
         .navbar nav {
             display: flex;
@@ -55,144 +65,304 @@
             color: var(--text-color);
             text-decoration: none;
             font-weight: 500;
-            transition: .3s;
+            transition: var(--transition);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
         }
-        .navbar a:hover { color: var(--blue-primary); }
+        .navbar a:hover { 
+            color: var(--blue-primary); 
+            background: rgba(59, 130, 246, 0.1);
+        }
 
         /* User Profile */
         .user-menu {
-            display: flex; align-items: center; gap: 15px;
-            padding-left: 15px; border-left: 1px solid #333;
+            display: flex; 
+            align-items: center; 
+            gap: 15px;
+            padding-left: 15px; 
+            border-left: 1px solid var(--accent-color);
         }
-        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-info { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
         .user-avatar {
-            width: 35px; height: 35px; border-radius: 50%;
-            object-fit: cover; border: 2px solid var(--blue-primary);
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%;
+            object-fit: cover; 
+            border: 2px solid var(--blue-primary);
+            transition: var(--transition);
         }
-        .user-name { font-weight: bold; font-size: 0.95rem; color: white; }
+        .user-avatar:hover { border-color: var(--blue-hover); }
+        .user-name { 
+            font-weight: 600; 
+            font-size: 1rem; 
+            color: var(--text-color); 
+            transition: var(--transition);
+        }
+        .user-name:hover { color: var(--blue-primary); }
         .btn-logout {
-            background: #ef4444; color: white; border: none;
-            padding: 6px 15px; border-radius: 5px; cursor: pointer;
-            font-weight: bold; transition: 0.3s;
+            background: var(--red-primary); 
+            color: white; 
+            border: none;
+            padding: 8px 16px; 
+            border-radius: 8px; 
+            cursor: pointer;
+            font-weight: 600; 
+            transition: var(--transition);
+            box-shadow: var(--shadow);
         }
-        .btn-logout:hover { background: #dc2626; }
+        .btn-logout:hover { 
+            background: var(--red-hover); 
+            transform: translateY(-2px);
+        }
 
         /* Hero Styles */
         .hero {
-            margin-top: 70px; height: 70vh;
+            margin-top: 80px; 
+            height: 75vh;
             background-image: url('images/the-premiere-1.jpg');
-            background-size: cover; background-position: center;
+            background-size: cover; 
+            background-position: center;
             position: relative;
+            display: flex;
+            align-items: flex-end;
         }
         .hero::before {
-            content: ""; position: absolute; inset: 0; background: var(--hero-gradient);
+            content: ""; 
+            position: absolute; 
+            inset: 0; 
+            background: var(--hero-gradient);
         }
         .hero-overlay {
-            position: absolute; bottom: 2rem; left: 2rem; z-index: 2;
+            position: relative; 
+            bottom: 3rem; 
+            left: 3rem; 
+            z-index: 2;
+            animation: fadeInUp 1s ease-out;
         }
         .hero-title {
-            font-size: 4rem; font-weight: bold; text-shadow: 2px 2px 4px black;
+            font-size: 4.5rem; 
+            font-weight: 700; 
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+            margin: 0;
+            letter-spacing: 1px;
         }
 
         /* General Sections */
         main { padding: 0 2rem; }
-        .section { padding: 3rem 0; max-width: 1200px; margin: auto; }
+        .section { 
+            padding: 4rem 0; 
+            max-width: 1200px; 
+            margin: auto; 
+        }
         .section-title {
-            font-size: 2rem; margin-bottom: 1.5rem; width: fit-content;
-            border-bottom: 2px solid var(--accent-color);
+            font-size: 2.5rem; 
+            margin-bottom: 2rem; 
+            width: fit-content;
+            border-bottom: 3px solid var(--blue-primary);
+            padding-bottom: 0.5rem;
+            font-weight: 700;
         }
 
         /* Features Grid */
         .features {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+            gap: 2.5rem;
         }
         .feature-card {
-            background: var(--secondary-bg); padding: 1.5rem; border-radius: 12px;
-            text-align: center; transition: .3s;
+            background: var(--secondary-bg); 
+            padding: 2rem; 
+            border-radius: var(--border-radius);
+            text-align: center; 
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--accent-color);
         }
         .feature-card:hover {
-            background: var(--hover-bg); transform: translateY(-6px);
+            background: var(--hover-bg); 
+            transform: translateY(-8px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
         }
         .feature-card img {
-            width: 100%; height: 200px; object-fit: cover; border-radius: 10px;
+            width: 100%; 
+            height: 220px; 
+            object-fit: cover; 
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .feature-card p {
+            color: var(--gray-light);
+            font-size: 1rem;
         }
 
         /* Movie Section Styles */
         .movie-tabs {
-            display: flex; justify-content: center; gap: 2.5rem;
-            margin-bottom: 2.5rem; border-bottom: 1px solid var(--accent-color);
-            padding-bottom: 5px;
+            display: flex; 
+            justify-content: center; 
+            gap: 3rem;
+            margin-bottom: 3rem; 
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
         }
         .movie-tabs .tab {
-            background: none; border: none; font-size: 1.2rem; font-weight: 600;
-            color: #888; cursor: pointer; padding: .5rem 1rem;
-            transition: .3s; border-bottom: 3px solid transparent;
+            background: none; 
+            border: none; 
+            font-size: 1.3rem; 
+            font-weight: 600;
+            color: var(--gray-light); 
+            cursor: pointer; 
+            padding: 0.75rem 1.5rem;
+            transition: var(--transition); 
+            border-bottom: 3px solid transparent;
+            border-radius: 8px;
         }
         .movie-tabs .tab.active {
-            border-bottom: 3px solid var(--blue-primary); color: white;
+            border-bottom: 3px solid var(--blue-primary); 
+            color: var(--text-color);
+            background: rgba(59, 130, 246, 0.1);
+        }
+        .movie-tabs .tab:hover {
+            color: var(--blue-primary);
         }
 
         .movie-carousel {
-            position: relative; display: flex; align-items: center; padding: 0 40px; 
+            position: relative; 
+            display: flex; 
+            align-items: center; 
+            padding: 0 50px; 
         }
         .movie-list {
-            display: flex; gap: 1.5rem; overflow-x: auto; padding: 1rem 0; 
-            scroll-behavior: smooth; -ms-overflow-style: none; scrollbar-width: none;
+            display: flex; 
+            gap: 2rem; 
+            overflow-x: auto; 
+            padding: 1.5rem 0; 
+            scroll-behavior: smooth; 
+            -ms-overflow-style: none; 
+            scrollbar-width: none;
         }
         .movie-list::-webkit-scrollbar { display: none; }
 
         /* Container Poster */
         .movie-poster-container {
-            position: relative; width: 200px; height: 300px; 
-            border-radius: 10px; overflow: hidden; flex-shrink: 0;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            transition: transform .3s; cursor: pointer;
+            position: relative; 
+            width: 220px; 
+            height: 330px; 
+            border-radius: var(--border-radius); 
+            overflow: hidden; 
+            flex-shrink: 0;
+            box-shadow: var(--shadow);
+            transition: var(--transition); 
+            cursor: pointer;
         }
         
-        /* FIX GAMBAR AGAR FULL */
         .movie-poster-container img {
-            width: 100%; height: 100%; object-fit: fill; display: block;
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            display: block;
         }
 
         .movie-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7); display: flex;
-            justify-content: center; align-items: center;
-            opacity: 0; transition: opacity 0.3s ease; z-index: 5;
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8); 
+            display: flex;
+            justify-content: center; 
+            align-items: center;
+            opacity: 0; 
+            transition: var(--transition); 
+            z-index: 5;
         }
-        .movie-poster-container:hover { transform: scale(1.05); }
+        .movie-poster-container:hover { 
+            transform: scale(1.08); 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.7);
+        }
         .movie-poster-container:hover .movie-overlay { opacity: 1; }
 
         .book-now-btn {
-            background-color: var(--blue-primary); color: white;
-            padding: 0.75rem 1.5rem; border: none; border-radius: 6px;
-            text-decoration: none; font-weight: bold; font-size: 1rem;
-            transition: background-color 0.2s;
+            background-color: var(--blue-primary); 
+            color: white;
+            padding: 0.875rem 1.75rem; 
+            border: none; 
+            border-radius: 8px;
+            text-decoration: none; 
+            font-weight: 600; 
+            font-size: 1.1rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
         }
-        .book-now-btn:hover { background-color: var(--blue-hover); }
+        .book-now-btn:hover { 
+            background-color: var(--blue-hover); 
+            transform: translateY(-2px);
+        }
 
         .carousel-btn {
-            background: var(--blue-primary); border: none; color: white;
-            font-size: 1.5rem; width: 50px; height: 50px; border-radius: 50%; 
-            cursor: pointer; position: absolute; z-index: 10;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5); transition: .2s;
-            display: flex; align-items: center; justify-content: center; padding: 0; 
+            background: var(--blue-primary); 
+            border: none; 
+            color: white;
+            font-size: 1.8rem; 
+            width: 55px; 
+            height: 55px; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            position: absolute; 
+            z-index: 10;
+            box-shadow: var(--shadow); 
+            transition: var(--transition);
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 0; 
         }
-        .carousel-btn:hover { background: var(--blue-hover); }
-        .carousel-btn.left { left: 0; }
-        .carousel-btn.right { right: 0; }
+        .carousel-btn:hover { 
+            background: var(--blue-hover); 
+            transform: scale(1.1);
+        }
+        .carousel-btn.left { left: 10px; }
+        .carousel-btn.right { right: 10px; }
         
         @media (max-width: 768px) {
-            .movie-carousel { padding: 0 10px; }
-            .carousel-btn.left { left: 0px; }
-            .carousel-btn.right { right: 0px; }
-            .user-menu { flex-direction: column; align-items: flex-start; border-left: none; padding-left: 0; }
+            .hero-title { font-size: 3rem; }
+            .movie-carousel { padding: 0 20px; }
+            .carousel-btn.left { left: 5px; }
+            .carousel-btn.right { right: 5px; }
+            .user-menu { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                border-left: none; 
+                padding-left: 0; 
+                gap: 10px;
+            }
+            .movie-tabs { gap: 1.5rem; }
+            .features { grid-template-columns: 1fr; }
         }
 
         .hidden { display: none; }
 
         footer {
-            background: black; padding: 1.5rem; text-align: center; color: #888;
+            background: rgba(0,0,0,0.9); 
+            padding: 2rem; 
+            text-align: center; 
+            color: var(--gray-light);
+            border-top: 1px solid var(--accent-color);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -290,7 +460,7 @@
 
 <section class="section description">
     <h2 class="section-title">Pemesanan Tiket yang Lebih Mudah</h2>
-    <p>
+    <p style="font-size: 1.2rem; color: var(--gray-light); max-width: 800px; margin: auto;">
         Bookingin memudahkan Anda untuk memesan tiket film favorit dengan cepat, praktis, dan tanpa ribet.
         Nikmati pengalaman memilih film, menentukan kursi, hingga pembayaran langsung dalam satu platform.
     </p>
@@ -333,21 +503,4 @@ function showTab(type) {
     
     if (type === "now") {
         tabs[0].classList.add("active");
-        document.getElementById("nowShowing").classList.remove("hidden");
-        document.getElementById("upcomingMovies").classList.add("hidden");
-    } else {
-        tabs[1].classList.add("active");
-        document.getElementById("upcomingMovies").classList.remove("hidden");
-        document.getElementById("nowShowing").classList.add("hidden");
-    }
-}
-
-function scrollMovies(listId, direction) {
-    const list = document.getElementById(listId);
-    const scrollAmount = 648 * direction;
-    list.scrollBy({ left: scrollAmount, behavior: "smooth" });
-}
-</script>
-
-</body>
-</html>
+        document
