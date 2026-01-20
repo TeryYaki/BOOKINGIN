@@ -6,9 +6,9 @@
     <title>Admin Dashboard - Bookingin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <style>
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #111; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
@@ -44,7 +44,7 @@
     <div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
         
         @if(session('success'))
-            <div class="bg-green-900/50 border border-green-600 text-green-200 px-4 py-3 rounded relative mb-6 flex items-center shadow-lg">
+            <div class="bg-green-900/50 border border-green-600 text-green-200 px-4 py-3 rounded relative mb-6 flex items-center shadow-lg animate-bounce-short">
                 <i class="fa-solid fa-check-circle mr-2"></i>
                 {{ session('success') }}
             </div>
@@ -58,7 +58,6 @@
                 </div>
                 <i class="fa-solid fa-money-bill-wave absolute right-4 bottom-4 text-green-500/10 text-6xl"></i>
             </div>
-
             <div class="bg-[#1b1b1b] p-6 rounded-xl shadow-lg border-l-4 border-blue-500 relative overflow-hidden">
                 <div class="relative z-10">
                     <p class="text-gray-400 text-sm font-medium uppercase tracking-wider">Tiket Terjual</p>
@@ -66,7 +65,6 @@
                 </div>
                 <i class="fa-solid fa-ticket absolute right-4 bottom-4 text-blue-500/10 text-6xl"></i>
             </div>
-
             <div class="bg-[#1b1b1b] p-6 rounded-xl shadow-lg border-l-4 border-purple-500 relative overflow-hidden">
                 <div class="relative z-10">
                     <p class="text-gray-400 text-sm font-medium uppercase tracking-wider">Film Aktif</p>
@@ -89,8 +87,9 @@
                             <th class="px-6 py-4">Pelanggan</th>
                             <th class="px-6 py-4">Film</th>
                             <th class="px-6 py-4 text-center">Kursi</th>
+                            <th class="px-6 py-4 text-center">Jadwal</th>
                             <th class="px-6 py-4">Total Harga</th>
-                            <th class="px-6 py-4">Tanggal Order</th>
+                            <th class="px-6 py-4">Waktu Order</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-800">
@@ -102,40 +101,30 @@
                                 </div>
                                 <div>
                                     <div class="font-medium text-white">{{ $trx->user_name }}</div>
-                                    <div class="text-[10px] text-gray-500">{{ $trx->region }}</div> </div>
+                                    <div class="text-[10px] text-gray-500">{{ $trx->region }}</div>
+                                </div>
                             </td>
-                            <td class="px-6 py-4 font-semibold text-white">
-                                {{ $trx->movie_title }}
-                            </td>
+                            <td class="px-6 py-4 font-semibold text-white">{{ $trx->movie_title }}</td>
+                            <td class="px-6 py-4 text-center"><span class="bg-gray-800 px-2 py-1 rounded text-xs border border-gray-700">{{ $trx->seats }}</span></td>
                             <td class="px-6 py-4 text-center">
-                                <span class="bg-gray-800 px-2 py-1 rounded text-xs border border-gray-700">{{ $trx->seats }}</span>
+                                <div class="text-blue-400 font-bold text-xs bg-blue-900/20 px-2 py-1 rounded border border-blue-900/50 inline-block mb-1">{{ $trx->screening_date }}</div>
+                                <div class="text-xs text-gray-500 font-mono">{{ $trx->screening_time }} WIB</div>
                             </td>
-                            <td class="px-6 py-4 text-green-400 font-mono font-bold">
-                                Rp {{ number_format($trx->total_price, 0, ',', '.') }}
-                            </td>
-                            <td class="px-6 py-4 text-xs text-gray-500">
-                                {{ $trx->created_at->format('d M Y, H:i') }}
-                            </td>
+                            <td class="px-6 py-4 text-green-400 font-mono font-bold">Rp {{ number_format($trx->total_price, 0, ',', '.') }}</td>
+                            <td class="px-6 py-4 text-xs text-gray-500">{{ $trx->created_at->format('d/m/Y H:i') }}</td>
                         </tr>
                         @empty
-                        <tr>
-                            <td colspan="5" class="px-6 py-8 text-center text-gray-500">
-                                <i class="fa-regular fa-folder-open text-2xl mb-2 block opacity-50"></i>
-                                Belum ada transaksi masuk dari Firebase.
-                            </td>
-                        </tr>
+                        <tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Belum ada transaksi.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
             @if($recentTransactions->hasPages())
-            <div class="p-4 border-t border-gray-800">
-                {{ $recentTransactions->links() }}
-            </div>
+            <div class="p-4 border-t border-gray-800">{{ $recentTransactions->links() }}</div>
             @endif
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" x-data="{ showEditModal: false, editData: {} }">
             
             <div class="lg:col-span-1">
                 <div class="bg-[#1b1b1b] p-6 rounded-xl shadow-xl border border-gray-800 sticky top-24">
@@ -147,36 +136,31 @@
                         @csrf
                         <div>
                             <label class="block text-sm font-medium text-gray-400 mb-1">Judul Film</label>
-                            <input type="text" name="title" class="w-full bg-[#222] border border-gray-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 transition outline-none" placeholder="Contoh: Avengers: Endgame" required>
+                            <input type="text" name="title" class="w-full bg-[#222] border border-gray-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Harga Tiket (IDR)</label>
+                            <input type="number" name="ticket_price" class="w-full bg-[#222] border border-gray-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="45000" required>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-400 mb-1">Status Tayang</label>
                             <select name="status" class="w-full bg-[#222] border border-gray-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 cursor-pointer">
-                                <option value="now_showing">🟢 Now Showing (Sedang Tayang)</option>
-                                <option value="upcoming">🟡 Upcoming (Akan Datang)</option>
+                                <option value="now_showing">🟢 Now Showing</option>
+                                <option value="upcoming">🟡 Upcoming</option>
                             </select>
                         </div>
-
                         <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-1">Deskripsi (Opsional)</label>
-                            <textarea name="description" rows="3" class="w-full bg-[#222] border border-gray-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Sinopsis singkat..."></textarea>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Deskripsi</label>
+                            <textarea name="description" rows="3" class="w-full bg-[#222] border border-gray-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
                         </div>
-
                         <div>
                             <label class="block text-sm font-medium text-gray-400 mb-1">Poster Film</label>
-                            <div class="relative border-2 border-dashed border-gray-700 bg-[#222] rounded-lg p-4 text-center hover:border-blue-500 transition group">
-                                <input type="file" name="poster" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required onchange="previewImage(event)">
-                                <div class="space-y-1" id="upload-placeholder">
-                                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-500 group-hover:text-blue-500 transition"></i>
-                                    <p class="text-xs text-gray-400">Klik atau tarik gambar ke sini</p>
-                                </div>
-                                <img id="img-preview" class="hidden max-h-32 mx-auto rounded shadow-lg">
-                            </div>
+                            <input type="file" name="poster" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700" required>
                         </div>
-
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-blue-500/30 transition duration-300 flex justify-center items-center gap-2">
-                            <i class="fa-solid fa-save"></i> Simpan Film
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-blue-500/30 transition duration-300">
+                            <i class="fa-solid fa-save mr-2"></i> Simpan Film
                         </button>
                     </form>
                 </div>
@@ -185,21 +169,16 @@
             <div class="lg:col-span-2">
                 <div class="bg-[#1b1b1b] rounded-xl shadow-xl border border-gray-800 overflow-hidden">
                     <div class="p-6 border-b border-gray-700 flex justify-between items-center">
-                        <h2 class="text-xl font-bold text-white">
-                            <i class="fa-solid fa-list mr-2 text-blue-500"></i> Daftar Film
-                        </h2>
-                        <span class="bg-blue-900/30 text-blue-400 text-xs font-semibold px-2.5 py-0.5 rounded border border-blue-800">
-                            Total: {{ $movies->count() }} Film
-                        </span>
+                        <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-list mr-2 text-blue-500"></i> Daftar Film</h2>
+                        <span class="bg-blue-900/30 text-blue-400 text-xs font-semibold px-2.5 py-0.5 rounded border border-blue-800">Total: {{ $movies->count() }}</span>
                     </div>
-
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm text-gray-400">
                             <thead class="bg-black text-gray-200 uppercase text-xs">
                                 <tr>
                                     <th class="px-6 py-4">Poster</th>
                                     <th class="px-6 py-4">Info Film</th>
-                                    <th class="px-6 py-4 text-center">Status</th>
+                                    <th class="px-6 py-4 text-center">Harga</th>
                                     <th class="px-6 py-4 text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -207,68 +186,98 @@
                                 @forelse($movies as $movie)
                                 <tr class="hover:bg-[#222] transition duration-200">
                                     <td class="px-6 py-4">
-                                        <div class="h-20 w-14 rounded overflow-hidden shadow-md border border-gray-700 relative group">
-                                            <img src="{{ asset($movie->poster_path) }}" alt="poster" class="h-full w-full object-cover group-hover:scale-110 transition duration-500">
+                                        <div class="h-20 w-14 rounded overflow-hidden border border-gray-700">
+                                            <img src="{{ asset($movie->poster_path) }}" class="h-full w-full object-cover">
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="font-bold text-white text-base mb-1">{{ $movie->title }}</div>
-                                        <div class="text-xs text-gray-500 line-clamp-2">{{ $movie->description ?? '-' }}</div>
-                                        <div class="text-[10px] text-gray-600 mt-1">Uploaded: {{ $movie->created_at->diffForHumans() }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
+                                        <div class="text-[10px] text-gray-500 mb-1 line-clamp-1">{{ $movie->description }}</div>
                                         @if($movie->status == 'now_showing')
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-green-900/30 text-green-400 border border-green-800">
-                                                Showing
-                                            </span>
+                                            <span class="text-xs text-green-400 border border-green-800 bg-green-900/30 px-2 py-0.5 rounded">Showing</span>
                                         @else
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-yellow-900/30 text-yellow-400 border border-yellow-800">
-                                                Upcoming
-                                            </span>
+                                            <span class="text-xs text-yellow-400 border border-yellow-800 bg-yellow-900/30 px-2 py-0.5 rounded">Upcoming</span>
                                         @endif
                                     </td>
+                                    <td class="px-6 py-4 text-center text-white font-mono">
+                                        Rp {{ number_format($movie->ticket_price, 0, ',', '.') }}
+                                    </td>
                                     <td class="px-6 py-4 text-center">
-                                        <form action="{{ route('admin.delete', $movie->id) }}" method="POST" onsubmit="return confirm('Hapus film ini?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-gray-500 hover:text-red-500 transition duration-300 p-2 rounded-full hover:bg-red-900/20" title="Hapus Film">
-                                                <i class="fa-solid fa-trash-can text-lg"></i>
+                                        <div class="flex justify-center gap-2">
+                                            <button @click="showEditModal = true; editData = { id: {{ $movie->id }}, title: '{{ addslashes($movie->title) }}', price: {{ $movie->ticket_price }}, status: '{{ $movie->status }}', desc: '{{ addslashes($movie->description) }}' }" 
+                                                class="text-gray-400 hover:text-blue-500 transition p-2 hover:bg-blue-900/20 rounded-full" title="Edit">
+                                                <i class="fa-solid fa-pen-to-square"></i>
                                             </button>
-                                        </form>
+
+                                            <form action="{{ route('admin.delete', $movie->id) }}" method="POST" onsubmit="return confirm('Hapus film ini?');">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="text-gray-400 hover:text-red-500 transition p-2 hover:bg-red-900/20 rounded-full" title="Hapus">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                                 @empty
-                                <tr>
-                                    <td colspan="4" class="px-6 py-10 text-center text-gray-500">
-                                        <i class="fa-regular fa-folder-open text-4xl mb-3 block opacity-50"></i>
-                                        Belum ada data.
-                                    </td>
-                                </tr>
+                                <tr><td colspan="4" class="px-6 py-10 text-center text-gray-500">Belum ada data.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
+
+            <div x-show="showEditModal" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div x-show="showEditModal" class="fixed inset-0 bg-black bg-opacity-80 transition-opacity" @click="showEditModal = false"></div>
+
+                    <div class="inline-block align-bottom bg-[#1b1b1b] border border-gray-700 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                        <form :action="'/admin/movie/' + editData.id" method="POST" enctype="multipart/form-data" class="p-6">
+                            @csrf 
+                            <input type="hidden" name="_method" value="PUT">
+                            
+                            <h3 class="text-lg font-medium leading-6 text-white mb-4"><i class="fa-solid fa-edit text-blue-500 mr-2"></i> Edit Film</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-400 mb-1">Judul Film</label>
+                                    <input type="text" name="title" x-model="editData.title" class="w-full bg-[#222] border border-gray-700 rounded-lg p-2.5 text-white outline-none focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-400 mb-1">Harga Tiket (IDR)</label>
+                                    <input type="number" name="ticket_price" x-model="editData.price" class="w-full bg-[#222] border border-gray-700 rounded-lg p-2.5 text-white outline-none focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-400 mb-1">Status</label>
+                                    <select name="status" x-model="editData.status" class="w-full bg-[#222] border border-gray-700 rounded-lg p-2.5 text-white outline-none focus:border-blue-500">
+                                        <option value="now_showing">🟢 Now Showing</option>
+                                        <option value="upcoming">🟡 Upcoming</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-400 mb-1">Deskripsi</label>
+                                    <textarea name="description" x-model="editData.desc" rows="3" class="w-full bg-[#222] border border-gray-700 rounded-lg p-2.5 text-white outline-none focus:border-blue-500"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-400 mb-1">Ganti Poster (Opsional)</label>
+                                    <input type="file" name="poster" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-700 file:text-white hover:file:bg-gray-600">
+                                </div>
+                            </div>
+
+                            <div class="mt-6 flex justify-end gap-3">
+                                <button type="button" @click="showEditModal = false" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition">Batal</button>
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">Simpan Perubahan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <footer class="mt-12 border-t border-gray-800 pt-6 text-center text-gray-600 text-sm">
             &copy; 2025 Bookingin Admin Panel. All rights reserved.
         </footer>
     </div>
-
-    <script>
-        function previewImage(event) {
-            const reader = new FileReader();
-            reader.onload = function(){
-                const output = document.getElementById('img-preview');
-                const placeholder = document.getElementById('upload-placeholder');
-                output.src = reader.result;
-                output.classList.remove('hidden');
-                placeholder.classList.add('hidden');
-            };
-            reader.readAsDataURL(event.target.files[0]);
-        }
-    </script>
 </body>
 </html>

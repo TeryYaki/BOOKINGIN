@@ -39,28 +39,34 @@ class BookingController extends Controller
     // 1. PROSES DATA (VALIDASI & SESSION)
     public function process(Request $request)
     {
-        // Validasi input region juga
+        // Validasi input
         $request->validate([
             'movie_id' => 'required',
-            'seats' => 'required',
-            'time' => 'required',
-            'region' => 'required' // <--- Tambahan Validasi
+            'seats'    => 'required',
+            'time'     => 'required',
+            'date'     => 'required', // Wajib ada tanggal
+            'region'   => 'required'
         ]);
 
         $movie = Movie::findOrFail($request->movie_id);
         $seats = explode(',', $request->seats); 
-        $totalPrice = count($seats) * 45000;
+        
+        // [UPDATE] Gunakan harga dari database film, jika tidak ada pakai default 45000
+        $pricePerTicket = $movie->ticket_price ?? 45000;
+        $totalPrice = count($seats) * $pricePerTicket;
 
         $bookingData = [
-            'movie_id' => $movie->id,
+            'movie_id'    => $movie->id,
             'movie_title' => $movie->title,
-            'poster' => $movie->poster_path,
-            'seats' => $seats,
-            'time' => $request->time,
-            'region' => $request->region, // <--- Simpan Kota ke Data
+            'poster'      => $movie->poster_path,
+            'seats'       => $seats,
+            'time'        => $request->time,
+            'date'        => $request->date,   // Simpan Tanggal ke Session
+            'region'      => $request->region,
             'total_price' => $totalPrice,
-            'order_id' => 'TIX-' . strtoupper(uniqid()), 
-            'created_at' => now()->toDateTimeString()
+            'price_per_ticket' => $pricePerTicket, // Simpan harga satuan utk referensi
+            'order_id'    => 'TIX-' . strtoupper(uniqid()), 
+            'created_at'  => now()->toDateTimeString()
         ];
 
         // Simpan ke Session
@@ -92,17 +98,19 @@ class BookingController extends Controller
         $user = Auth::user();
         $userId = $user->firebase_uid ?? 'user_' . $user->id;
 
+        // Data yang akan masuk ke Firebase
         $firebaseData = [
-            'order_id' => $booking['order_id'],
+            'order_id'    => $booking['order_id'],
             'movie_title' => $booking['movie_title'],
-            'seats' => $booking['seats'],
-            'time' => $booking['time'],
-            'region' => $booking['region'], // <--- Kirim Kota ke Firebase
-            'price' => $booking['total_price'],
-            'user_name' => $user->name,
-            'user_email' => $user->email,
-            'poster' => asset($booking['poster']),
-            'timestamp' => ['.sv' => 'timestamp']
+            'seats'       => $booking['seats'],
+            'time'        => $booking['time'],
+            'date'        => $booking['date'],   // Masuk ke Database Firebase
+            'region'      => $booking['region'],
+            'price'       => $booking['total_price'],
+            'user_name'   => $user->name,
+            'user_email'  => $user->email,
+            'poster'      => asset($booking['poster']),
+            'timestamp'   => ['.sv' => 'timestamp'] // Server timestamp
         ];
 
         try {
