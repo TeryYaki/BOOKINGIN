@@ -4,503 +4,508 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bookingin – Main Page</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
-            --primary-bg: #0f0f0f;
-            --secondary-bg: #1a1a1a;
-            --hover-bg: #2a2a2a;
-            --text-color: #ffffff;
-            --accent-color: #444444;
-            --hero-gradient: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.9));
-            --blue-primary: #3b82f6;
-            --blue-hover: #2563eb;
-            --red-primary: #ef4444;
-            --red-hover: #dc2626;
-            --gray-light: #888888;
-            --shadow: 0 4px 12px rgba(0,0,0,0.5);
-            --border-radius: 12px;
-            --transition: all 0.3s ease;
+            --primary-bg: #0a0a0a;
+            --secondary-bg: #161616;
+            --card-bg: #1f1f1f;
+            --text-main: #ffffff;
+            --text-muted: #a1a1a1;
+            
+            --brand-blue: #3b82f6;
+            --brand-blue-dark: #2563eb;
+            --brand-red: #ef4444;
+            
+            --gradient-main: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --hero-overlay: linear-gradient(to bottom, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.8) 60%, #0a0a0a 100%);
+            
+            --glass: rgba(22, 22, 22, 0.8);
+            --shadow: 0 10px 30px rgba(0,0,0,0.5);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            margin: 0;
             font-family: 'Roboto', sans-serif;
-            background: var(--primary-bg);
-            color: var(--text-color);
-            line-height: 1.6;
+            background-color: var(--primary-bg);
+            color: var(--text-main);
             overflow-x: hidden;
+            line-height: 1.6;
         }
 
-        /* Navbar Styles */
+        h1, h2, h3 { font-family: 'Montserrat', sans-serif; }
+
+        /* --- NAVBAR MODERN --- */
         header.navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(0,0,0,0.9);
-            backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 1rem 5%;
             position: fixed;
             top: 0;
             width: 100%;
-            z-index: 100;
-            box-shadow: var(--shadow);
-            border-bottom: 1px solid var(--accent-color);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: var(--transition);
         }
+
         .navbar .logo {
             font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--text-color);
-            letter-spacing: 2px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: 1px;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .navbar nav {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-        .navbar a {
-            color: var(--text-color);
+
+        .navbar nav { display: flex; align-items: center; gap: 20px; }
+
+        .nav-link {
+            color: var(--text-muted);
             text-decoration: none;
             font-weight: 500;
+            font-size: 0.95rem;
             transition: var(--transition);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
+            position: relative;
         }
-        .navbar a:hover { 
-            color: var(--blue-primary); 
-            background: rgba(59, 130, 246, 0.1);
+
+        .nav-link:hover, .nav-link.active { color: var(--text-main); }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0; height: 2px;
+            bottom: -5px; left: 0;
+            background: var(--brand-blue);
+            transition: var(--transition);
         }
+        .nav-link:hover::after { width: 100%; }
+
+        /* Auth Buttons */
+        .btn-auth {
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        .btn-login { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.1); }
+        .btn-login:hover { background: white; color: black; }
+        .btn-register { background: var(--brand-blue); color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+        .btn-register:hover { background: var(--brand-blue-dark); transform: translateY(-2px); }
 
         /* User Profile */
-        .user-menu {
-            display: flex; 
-            align-items: center; 
-            gap: 15px;
-            padding-left: 15px; 
-            border-left: 1px solid var(--accent-color);
-        }
-        .user-info { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-        }
-        .user-avatar {
-            width: 40px; 
-            height: 40px; 
-            border-radius: 50%;
-            object-fit: cover; 
-            border: 2px solid var(--blue-primary);
-            transition: var(--transition);
-        }
-        .user-avatar:hover { border-color: var(--blue-hover); }
-        .user-name { 
-            font-weight: 600; 
-            font-size: 1rem; 
-            color: var(--text-color); 
-            transition: var(--transition);
-        }
-        .user-name:hover { color: var(--blue-primary); }
+        .user-menu { display: flex; align-items: center; gap: 15px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 20px; }
+        .user-info { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .user-avatar { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--brand-blue); }
+        .user-name { font-weight: 600; font-size: 0.95rem; color: white; }
+        
         .btn-logout {
-            background: var(--red-primary); 
-            color: white; 
-            border: none;
-            padding: 8px 16px; 
-            border-radius: 8px; 
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 6px 14px;
+            border-radius: 6px;
             cursor: pointer;
-            font-weight: 600; 
+            font-size: 0.8rem;
             transition: var(--transition);
-            box-shadow: var(--shadow);
         }
-        .btn-logout:hover { 
-            background: var(--red-hover); 
-            transform: translateY(-2px);
-        }
+        .btn-logout:hover { border-color: var(--brand-red); color: var(--brand-red); }
 
-        /* Hero Styles */
+        /* --- HERO SECTION --- */
         .hero {
-            margin-top: 80px; 
-            height: 75vh;
-            background-image: url('images/the-premiere-1.jpg');
-            background-size: cover; 
-            background-position: center;
+            height: 85vh;
+            background: url('images/the-premiere-1.jpg') no-repeat center center/cover;
             position: relative;
             display: flex;
-            align-items: flex-end;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 3rem;
         }
-        .hero::before {
-            content: ""; 
-            position: absolute; 
-            inset: 0; 
-            background: var(--hero-gradient);
-        }
-        .hero-overlay {
-            position: relative; 
-            bottom: 3rem; 
-            left: 3rem; 
-            z-index: 2;
+        .hero::after { content: ""; position: absolute; inset: 0; background: var(--hero-overlay); }
+        
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
             animation: fadeInUp 1s ease-out;
         }
         .hero-title {
-            font-size: 4.5rem; 
-            font-weight: 700; 
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
-            margin: 0;
-            letter-spacing: 1px;
+            font-size: 5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin-bottom: 1rem;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        /* General Sections */
-        main { padding: 0 2rem; }
-        .section { 
-            padding: 4rem 0; 
-            max-width: 1200px; 
-            margin: auto; 
+        /* --- SECTIONS --- */
+        .container { max-width: 1300px; margin: 0 auto; padding: 0 2rem; }
+        .section { padding: 4rem 0; }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
         }
         .section-title {
-            font-size: 2.5rem; 
-            margin-bottom: 2rem; 
-            width: fit-content;
-            border-bottom: 3px solid var(--blue-primary);
-            padding-bottom: 0.5rem;
+            font-size: 2.5rem;
             font-weight: 700;
+            display: inline-block;
+            position: relative;
+        }
+        .section-title::after {
+            content: ''; display: block; width: 60px; height: 4px; 
+            background: var(--brand-blue); margin: 10px auto 0; border-radius: 2px;
         }
 
-        /* Features Grid */
-        .features {
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
-            gap: 2.5rem;
-        }
-        .feature-card {
-            background: var(--secondary-bg); 
-            padding: 2rem; 
-            border-radius: var(--border-radius);
-            text-align: center; 
-            transition: var(--transition);
-            box-shadow: var(--shadow);
-            border: 1px solid var(--accent-color);
-        }
-        .feature-card:hover {
-            background: var(--hover-bg); 
-            transform: translateY(-8px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-        }
-        .feature-card img {
-            width: 100%; 
-            height: 220px; 
-            object-fit: cover; 
-            border-radius: 10px;
-            margin-bottom: 1.5rem;
-        }
-        .feature-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            font-weight: 600;
-        }
-        .feature-card p {
-            color: var(--gray-light);
-            font-size: 1rem;
-        }
-
-        /* Movie Section Styles */
+        /* --- TABS --- */
         .movie-tabs {
-            display: flex; 
-            justify-content: center; 
-            gap: 3rem;
-            margin-bottom: 3rem; 
-            border-bottom: 2px solid var(--accent-color);
-            padding-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 2.5rem;
+            background: var(--secondary-bg);
+            padding: 5px;
+            border-radius: 50px;
+            width: fit-content;
+            margin-left: auto; margin-right: auto;
+            border: 1px solid rgba(255,255,255,0.05);
         }
-        .movie-tabs .tab {
-            background: none; 
-            border: none; 
-            font-size: 1.3rem; 
+        .tab {
+            background: none; border: none;
+            color: var(--text-muted);
+            padding: 10px 25px;
+            border-radius: 30px;
             font-weight: 600;
-            color: var(--gray-light); 
-            cursor: pointer; 
-            padding: 0.75rem 1.5rem;
-            transition: var(--transition); 
-            border-bottom: 3px solid transparent;
-            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
         }
-        .movie-tabs .tab.active {
-            border-bottom: 3px solid var(--blue-primary); 
-            color: var(--text-color);
-            background: rgba(59, 130, 246, 0.1);
-        }
-        .movie-tabs .tab:hover {
-            color: var(--blue-primary);
-        }
+        .tab.active { background: var(--brand-blue); color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+        .tab:hover:not(.active) { color: white; }
 
-        .movie-carousel {
-            position: relative; 
-            display: flex; 
-            align-items: center; 
-            padding: 0 50px; 
-        }
+        /* --- CAROUSEL --- */
+        .carousel-wrapper { position: relative; padding: 0 60px; }
         .movie-list {
-            display: flex; 
-            gap: 2rem; 
-            overflow-x: auto; 
-            padding: 1.5rem 0; 
-            scroll-behavior: smooth; 
-            -ms-overflow-style: none; 
-            scrollbar-width: none;
+            display: flex;
+            gap: 25px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 20px 5px;
+            scrollbar-width: none; /* Hide scrollbar Firefox */
         }
         .movie-list::-webkit-scrollbar { display: none; }
 
-        /* Container Poster */
-        .movie-poster-container {
-            position: relative; 
-            width: 220px; 
-            height: 330px; 
-            border-radius: var(--border-radius); 
-            overflow: hidden; 
-            flex-shrink: 0;
-            box-shadow: var(--shadow);
-            transition: var(--transition); 
+        /* --- MOVIE CARD --- */
+        .movie-card {
+            flex: 0 0 240px;
+            height: 360px;
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             cursor: pointer;
+            background: #000;
         }
-        
-        .movie-poster-container img {
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            display: block;
-        }
+        .movie-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .movie-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.6); }
+        .movie-card:hover img { transform: scale(1.1); opacity: 0.6; }
 
         .movie-overlay {
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8); 
-            display: flex;
-            justify-content: center; 
-            align-items: center;
-            opacity: 0; 
-            transition: var(--transition); 
-            z-index: 5;
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            display: flex; flex-direction: column;
+            justify-content: flex-end; align-items: center;
+            padding: 20px;
+            opacity: 0; transition: var(--transition);
         }
-        .movie-poster-container:hover { 
-            transform: scale(1.08); 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.7);
-        }
-        .movie-poster-container:hover .movie-overlay { opacity: 1; }
+        .movie-card:hover .movie-overlay { opacity: 1; }
 
-        .book-now-btn {
-            background-color: var(--blue-primary); 
+        .book-btn {
+            background: var(--brand-blue);
             color: white;
-            padding: 0.875rem 1.75rem; 
-            border: none; 
+            padding: 12px 30px;
             border-radius: 8px;
-            text-decoration: none; 
-            font-weight: 600; 
-            font-size: 1.1rem;
+            text-decoration: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
             transition: var(--transition);
-            box-shadow: var(--shadow);
         }
-        .book-now-btn:hover { 
-            background-color: var(--blue-hover); 
-            transform: translateY(-2px);
+        .book-btn:hover { background: white; color: var(--brand-blue); transform: scale(1.05); }
+
+        /* Carousel Nav Buttons */
+        .nav-btn {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 50px; height: 50px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            color: white; font-size: 1.2rem;
+            cursor: pointer; z-index: 10;
+            transition: var(--transition);
+            display: flex; justify-content: center; align-items: center;
+        }
+        .nav-btn:hover { background: var(--brand-blue); border-color: var(--brand-blue); transform: translateY(-50%) scale(1.1); }
+        .nav-btn.left { left: 0; }
+        .nav-btn.right { right: 0; }
+
+        /* --- FEATURES --- */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        .feature-item {
+            background: var(--secondary-bg);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: var(--transition);
+        }
+        .feature-item:hover { 
+            transform: translateY(-5px); 
+            background: var(--card-bg); 
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        .feature-icon {
+            width: 70px; height: 70px;
+            margin: 0 auto 1.5rem;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            color: var(--brand-blue);
+            font-size: 1.8rem;
+        }
+        .feature-item h3 { margin-bottom: 0.8rem; color: white; }
+        .feature-item p { color: var(--text-muted); font-size: 0.95rem; }
+
+        /* --- FOOTER --- */
+        footer {
+            background: #050505;
+            padding: 3rem 0;
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            margin-top: 4rem;
         }
 
-        .carousel-btn {
-            background: var(--blue-primary); 
-            border: none; 
-            color: white;
-            font-size: 1.8rem; 
-            width: 55px; 
-            height: 55px; 
-            border-radius: 50%; 
-            cursor: pointer; 
-            position: absolute; 
-            z-index: 10;
-            box-shadow: var(--shadow); 
-            transition: var(--transition);
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 0; 
-        }
-        .carousel-btn:hover { 
-            background: var(--blue-hover); 
-            transform: scale(1.1);
-        }
-        .carousel-btn.left { left: 10px; }
-        .carousel-btn.right { right: 10px; }
-        
+        /* Utils */
+        .hidden { display: none !important; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Mobile Responsive */
         @media (max-width: 768px) {
             .hero-title { font-size: 3rem; }
-            .movie-carousel { padding: 0 20px; }
-            .carousel-btn.left { left: 5px; }
-            .carousel-btn.right { right: 5px; }
-            .user-menu { 
-                flex-direction: column; 
-                align-items: flex-start; 
-                border-left: none; 
-                padding-left: 0; 
-                gap: 10px;
-            }
-            .movie-tabs { gap: 1.5rem; }
-            .features { grid-template-columns: 1fr; }
-        }
-
-        .hidden { display: none; }
-
-        footer {
-            background: rgba(0,0,0,0.9); 
-            padding: 2rem; 
-            text-align: center; 
-            color: var(--gray-light);
-            border-top: 1px solid var(--accent-color);
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            .carousel-wrapper { padding: 0; }
+            .navbar { padding: 1rem; }
+            .navbar nav { gap: 10px; }
+            .nav-link { display: none; } /* Hide links on mobile for simplicity or use hamburger */
+            .logo { font-size: 1.5rem; }
         }
     </style>
 </head>
 
 <body>
 
-<header class="navbar">
-    <div class="logo">BOOKINGIN</div>
-    <nav>
-        <a href="{{ route('home') }}" style="color:#3b82f6;">Beranda</a>
-        <a href="{{ route('movies') }}">Movies</a>
+    <header class="navbar">
+        <div class="logo">BOOKINGIN</div>
+        <nav>
+            <a href="{{ route('home') }}" class="nav-link active">Beranda</a>
+            <a href="{{ route('movies') }}" class="nav-link">Movies</a>
 
-        {{-- LOGIKA: Jika Belum Login (Guest) --}}
-        @guest
-            <a href="{{ route('register') }}" aria-label="register" style="background:#e50914; padding:5px 15px; border-radius:5px;">Daftar</a>
-            <a href="{{ route('login') }}" aria-label="login" style="background:#3b82f6; padding:5px 15px; border-radius:5px;">Login</a>
-        @endguest
+            @guest
+                <a href="{{ route('register') }}" class="btn-auth btn-register">Daftar</a>
+                <a href="{{ route('login') }}" class="btn-auth btn-login">Login</a>
+            @endguest
 
-        {{-- LOGIKA: Jika Sudah Login (Auth) --}}
-        @auth
-            <div class="user-menu">
-                <div class="user-info">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=3b82f6&color=fff&size=128" 
-                         alt="User Profile" 
-                         class="user-avatar">
-                    <a href="{{ route('profile') }}" class="user-name" style="color: white; text-decoration: none; font-weight: bold;">
-                        {{ Auth::user()->name }}
+            @auth
+                <div class="user-menu">
+                    <a href="{{ route('profile') }}" class="user-info">
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=3b82f6&color=fff&size=128" 
+                             alt="Profile" class="user-avatar">
+                        <span class="user-name">{{ Auth::user()->name }}</span>
+                    </a>
+                    
+                    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+                        @csrf
+                        <button type="submit" class="btn-logout" title="Logout">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </form>
+                </div>
+            @endauth
+        </nav>
+    </header>
+
+    <div class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">BOOKINGIN</h1>
+            <p class="hero-subtitle">Nikmati pengalaman menonton terbaik dengan pemesanan tiket yang cepat, mudah, dan terpercaya.</p>
+        </div>
+    </div>
+
+    <main class="container">
+
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">Pilih Film Anda</h2>
+            </div>
+
+            <div class="movie-tabs">
+                <button class="tab active" onclick="showTab('now')">Sedang Tayang</button>
+                <button class="tab" onclick="showTab('upcoming')">Akan Datang</button>
+            </div>
+
+            <div id="nowShowing" class="carousel-wrapper">
+                <button class="nav-btn left" onclick="scrollMovies('movieList', -1)">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+          
+                <div class="movie-list" id="movieList">
+                    @forelse($nowShowing as $movie)
+                        <div class="movie-card">
+                            <img src="{{ asset($movie->poster_path) }}" alt="{{ $movie->title }}" loading="lazy">
+                            <div class="movie-overlay">
+                                <h3 style="color:white; margin-bottom:10px; text-align:center;">{{ $movie->title }}</h3>
+                                <a href="{{ route('film', $movie->id) }}" class="book-btn">Book Now</a>
+                            </div>
+                        </div>
+                    @empty
+                        <div style="padding: 20px; color: var(--text-muted); width:100%; text-align:center;">
+                            Belum ada film yang sedang tayang.
+                        </div>
+                    @endforelse
+                </div>
+
+                <button class="nav-btn right" onclick="scrollMovies('movieList', 1)">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <div id="upcomingMovies" class="carousel-wrapper hidden">
+                <button class="nav-btn left" onclick="scrollMovies('upcomingMovieList', -1)">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+
+                <div class="movie-list" id="upcomingMovieList">
+                    @forelse($upcoming as $movie)
+                        <div class="movie-card">
+                            <img src="{{ asset($movie->poster_path) }}" alt="{{ $movie->title }}" loading="lazy">
+                            <div class="movie-overlay">
+                                <span class="book-btn" style="background: #333; cursor: default; border:1px solid #555;">Coming Soon</span>
+                            </div>
+                        </div>
+                    @empty
+                        <div style="padding: 20px; color: var(--text-muted); width:100%; text-align:center;">
+                            Belum ada film upcoming.
+                        </div>
+                    @endforelse
+                </div>
+
+                <button class="nav-btn right" onclick="scrollMovies('upcomingMovieList', 1)">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <section class="section" style="background: linear-gradient(to right, #0f0f0f, #1a1a1a); border-radius: 20px; padding: 4rem;">
+            <div style="display:flex; flex-wrap:wrap; align-items:center; gap: 40px;">
+                <div style="flex:1;">
+                    <h2 class="section-title" style="margin-bottom: 1.5rem; text-align:left;">Cara Baru Nonton Bioskop</h2>
+                    <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem;">
+                        Lupakan antrean panjang. Dengan <strong>Bookingin</strong>, kursi favorit Anda hanya berjarak satu klik. 
+                        Kami menyediakan integrasi langsung dengan bioskop terkemuka untuk memastikan kenyamanan Anda.
+                    </p>
+                    <a href="{{ route('movies') }}" style="color: var(--brand-blue); text-decoration:none; font-weight:700; display:flex; align-items:center; gap:10px;">
+                        Lihat Semua Film <i class="fa-solid fa-arrow-right"></i>
                     </a>
                 </div>
-                
-                <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="btn-logout">Keluar</button>
-                </form>
+                </div>
+        </section>
+
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">Kenapa Bookingin?</h2>
             </div>
-        @endauth
-    </nav>
-</header>
 
-<div class="hero">
-    <div class="hero-overlay">
-        <h1 class="hero-title">BOOKINGIN</h1>
-    </div>
-</div>
-
-<main>
-
-<section class="section movie-section">
-    <h2 class="section-title" style="margin:auto; text-align:center; margin-bottom: 3rem;">Choose Your Movie</h2>
-
-    <div class="movie-tabs">
-        <button class="tab active" onclick="showTab('now')">Now Showing</button>
-        <button class="tab" onclick="showTab('upcoming')">Upcoming</button>
-    </div>
-
-    <div class="movie-carousel" id="nowShowing">
-        <button class="carousel-btn left" onclick="scrollMovies('movieList', -1)">&#10094;</button>
-  
-        <div class="movie-list" id="movieList">
-            @forelse($nowShowing as $movie)
-                <div class="movie-poster-container">
-                    <img src="{{ asset($movie->poster_path) }}" alt="{{ $movie->title }}">
-                    <div class="movie-overlay">
-                        <a href="{{ route('film', $movie->id) }}" class="book-now-btn">Book Now</a>
-                    </div>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
+                    <h3>Cepat & Instan</h3>
+                    <p>Proses pemesanan yang dioptimalkan agar Anda mendapatkan tiket kurang dari 1 menit.</p>
                 </div>
-            @empty
-                <div style="padding: 20px; color: white;">Belum ada film yang tayang.</div>
-            @endforelse
-        </div>
 
-        <button class="carousel-btn right" onclick="scrollMovies('movieList', 1)">&#10095;</button>
-    </div>
-
-    <div class="movie-carousel hidden" id="upcomingMovies">
-        <button class="carousel-btn left" onclick="scrollMovies('upcomingMovieList', -1)">&#10094;</button>
-
-        <div class="movie-list" id="upcomingMovieList">
-            @forelse($upcoming as $movie)
-                <div class="movie-poster-container">
-                    <img src="{{ asset($movie->poster_path) }}" alt="{{ $movie->title }}">
-                    <div class="movie-overlay">
-                        <span class="book-now-btn" style="background: #555; cursor: default;">Coming Soon</span>
-                    </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fa-solid fa-couch"></i></div>
+                    <h3>Pilih Kursi Sendiri</h3>
+                    <p>Visualisasi denah kursi yang akurat memudahkan Anda memilih spot menonton terbaik.</p>
                 </div>
-            @empty
-                <div style="padding: 20px; color: white;">Belum ada film upcoming.</div>
-            @endforelse
-        </div>
 
-        <button class="carousel-btn right" onclick="scrollMovies('upcomingMovieList', 1)">&#10095;</button>
-    </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h3>Transaksi Aman</h3>
+                    <p>Didukung oleh gateway pembayaran terpercaya dengan enkripsi keamanan tingkat tinggi.</p>
+                </div>
+            </div>
+        </section>
 
-</section>
+    </main>
 
-<section class="section description">
-    <h2 class="section-title">Pemesanan Tiket yang Lebih Mudah</h2>
-    <p style="font-size: 1.2rem; color: var(--gray-light); max-width: 800px; margin: auto;">
-        Bookingin memudahkan Anda untuk memesan tiket film favorit dengan cepat, praktis, dan tanpa ribet.
-        Nikmati pengalaman memilih film, menentukan kursi, hingga pembayaran langsung dalam satu platform.
-    </p>
-</section>
+    <footer>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">
+            © 2025 Bookingin. Dibuat dengan <i class="fa-solid fa-heart" style="color: var(--brand-red);"></i> untuk pecinta film.
+        </p>
+    </footer>
 
-<section class="section">
-    <h2 class="section-title">About BOOKINGIN</h2>
+    <script>
+        // Tab Functionality
+        function showTab(type) {
+            const nowShowing = document.getElementById('nowShowing');
+            const upcoming = document.getElementById('upcomingMovies');
+            const tabs = document.querySelectorAll('.tab');
+            
+            // Reset Active State
+            tabs.forEach(t => t.classList.remove('active'));
 
-    <div class="features">
-        <div class="feature-card">
-            <img src="images/Phone.jpg" alt="Fitur Pemesanan Cepat">
-            <h3>Pemesanan Cepat & Praktis</h3>
-            <p>Pilih film, pilih kursi, pesan tiket hanya dalam hitungan detik.</p>
-        </div>
+            if (type === 'now') {
+                nowShowing.classList.remove('hidden');
+                upcoming.classList.add('hidden');
+                tabs[0].classList.add('active');
+            } else {
+                nowShowing.classList.add('hidden');
+                upcoming.classList.remove('hidden');
+                tabs[1].classList.add('active');
+            }
+        }
 
-        <div class="feature-card">
-            <img src="images/Seat.png" alt="Fitur Pilihan Kursi">
-            <h3>Pilihan Kursi Fleksibel</h3>
-            <p>Pilih sendiri kursi terbaik langsung dari layout bioskop.</p>
-        </div>
-
-        <div class="feature-card">
-            <img src="images/Payment.jpg" alt="Fitur Pembayaran Aman">
-            <h3>Pembayaran Aman & Beragam</h3>
-            <p>Tersedia e-wallet, bank transfer, debit, dan QRIS.</p>
-        </div>
-    </div>
-</section>
-
-</main>
-
-<footer>
-    <p>© 2025 Bookingin. Semua hak cipta dilindungi. | Dibuat untuk kemudahan pemesanan tiket Anda.</p>
-</footer>
-
-<script>
-function showTab(type) {
-    const tabs = document.querySelectorAll(".tab");
-    tabs.forEach(btn => btn.classList.remove("active"));
-    
-    if (type === "now") {
-        tabs[0].classList.add("active");
-        document
+        // Carousel Scroll Functionality
+        function scrollMovies(containerId, direction) {
+            const container = document.getElementById(containerId);
+            const scrollAmount = 300; // Jarak scroll
+            
+            if (direction === 1) {
+                container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            } else {
+                container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>
