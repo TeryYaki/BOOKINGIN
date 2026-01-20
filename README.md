@@ -3,7 +3,6 @@
 **BOOKINGIN** adalah aplikasi berbasis web yang dibangun menggunakan **Laravel** dan terintegrasi dengan **Firebase** untuk autentikasi dan penyimpanan data transaksi secara *real-time*. Aplikasi ini menawarkan pengalaman pemesanan tiket bioskop yang cepat, aman, dan responsif dengan antarmuka modern (Glassmorphism & Dark Mode).
 
 ![Bookingin Banner](public/Images/the-premiere-1.jpg)
-*(Anda bisa mengganti gambar ini dengan screenshot aplikasi asli)*
 
 ---
 
