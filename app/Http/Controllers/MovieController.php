@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Movie;
-use App\Models\Studio; // [PENTING] Jangan lupa import ini
+use App\Models\Studio;
 use Illuminate\Http\Request;
 
 class MovieController extends Controller
@@ -12,28 +12,26 @@ class MovieController extends Controller
     {
         $query = Movie::query();
 
-        // 1. Filter Judul (Search)
+        // 1. Filter Judul
         if ($request->filled('q')) {
             $query->where('title', 'like', '%' . $request->q . '%');
         }
 
-        // 2. Filter Lokasi (Advanced Relation)
-        // Logika: Cari film yang PUNYA jadwal tayang DI studio yang kotanya X
+        // 2. Filter Lokasi
         if ($request->filled('location')) {
             $query->whereHas('showtimes.studio', function($q) use ($request) {
                 $q->where('city', $request->location);
             });
         }
 
-        // Eksekusi Query dengan Eager Loading
-        $movies = $query->with('showtimes')->latest()->get(); 
+        // 3. Eksekusi dengan Optimasi Eager Loading (Nested)
+        // Memuat 'showtimes' DAN 'studio' sekaligus untuk menghindari query berulang di view
+        $movies = $query->with(['showtimes.studio'])->latest()->get(); 
         
-        // Ambil daftar kota unik untuk dropdown di View
+        // 4. Data untuk Dropdown Filter
         $cities = Studio::select('city')->distinct()->orderBy('city')->pluck('city');
 
-        // Pastikan nama view sesuai dengan file blade Anda.
-        // Jika file ada di resources/views/movies.blade.php gunakan 'movies'
-        // Jika file ada di resources/views/Movies/index.blade.php gunakan 'Movies.index'
-        return view('movies', compact('movies', 'cities'));
+        // Pastikan nama folder view sesuai (Disarankan rename folder 'Movies' jadi 'movies' kecil)
+        return view('Movies.index', compact('movies', 'cities'));
     }
 }

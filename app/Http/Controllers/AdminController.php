@@ -150,6 +150,8 @@ class AdminController extends Controller {
         if ($request->hasFile('poster')) {
             $imageName = time().'.'.$request->poster->extension();
             $request->poster->move(public_path('images/movies'), $imageName);
+            unset($validatedData['poster']); // Hapus raw file object agar tidak ikut dimasukkan ke query SQL
+            Movie::create($validatedData);
             
             // Update path poster baru
             $dataToUpdate['poster_path'] = 'images/movies/'.$imageName;
