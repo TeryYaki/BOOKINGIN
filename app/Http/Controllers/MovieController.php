@@ -3,14 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Movie;
-use App\Models\Studio;
+use App\Models\Studio; // [PENTING] Jangan lupa import ini
 use Illuminate\Http\Request;
 
 class MovieController extends Controller
 {
     public function index(Request $request) 
     {
-        // Mulai Query
         $query = Movie::query();
 
         // 1. Filter Judul (Search)
@@ -26,12 +25,15 @@ class MovieController extends Controller
             });
         }
 
-        // Eksekusi Query
-        $movies = $query->with('showtimes')->get(); // 'with' agar query lebih ringan (eager loading)
+        // Eksekusi Query dengan Eager Loading
+        $movies = $query->with('showtimes')->latest()->get(); 
         
-        // Ambil daftar kota unik untuk dropdown
+        // Ambil daftar kota unik untuk dropdown di View
         $cities = Studio::select('city')->distinct()->orderBy('city')->pluck('city');
 
-        return view('movies.index', compact('movies', 'cities'));
+        // Pastikan nama view sesuai dengan file blade Anda.
+        // Jika file ada di resources/views/movies.blade.php gunakan 'movies'
+        // Jika file ada di resources/views/Movies/index.blade.php gunakan 'Movies.index'
+        return view('movies', compact('movies', 'cities'));
     }
 }
