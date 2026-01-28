@@ -6,6 +6,10 @@ use App\Http\Controllers\AdminController;
 use App\Models\Movie;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\MovieController; // Buat controller ini atau pakai MainController
+
+
+Route::get('/movies', [MovieController::class, 'index'])->name('movies.index');
 
 // --- ROUTE PUBLIC ---
 Route::get('/', function () {
