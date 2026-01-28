@@ -9,22 +9,18 @@ class Transaction extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'movie_id',
-        'order_id',
-        'seats',
-        'total_price',
-        'status'
-    ];
+    protected $guarded = [];
 
-    public function movie()
-    {
-        return $this->belongsTo(Movie::class);
-    }
-
+    // Relasi: Transaksi milik siapa?
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    // [PENTING] Relasi ke Showtime (Pengganti Movie, Date, Time, Region)
+    // Dari sini kita bisa ambil info: $transaction->showtime->movie->title
+    public function showtime()
+    {
+        return $this->belongsTo(Showtime::class);
     }
 }

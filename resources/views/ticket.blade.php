@@ -43,9 +43,20 @@
             <div class="body">
                 <h3 style="margin:0 0 15px 0; text-transform:uppercase; font-family: Arial;">{{ $booking['movie_title'] }}</h3>
                 
+                <div style="margin-bottom: 5px;">
+                    <span class="label">LOKASI BIOSKOP</span>
+                    <span class="val" style="font-size:15px; color:#222;">{{ $booking['region'] }}</span>
+                </div>
+
                 <div style="display: flex; justify-content: space-between;">
-                    <div><span class="label">TANGGAL</span><span class="val">{{ date('d M Y') }}</span></div>
-                    <div><span class="label">JAM</span><span class="val">{{ $booking['time'] }}</span></div>
+                    <div>
+                        <span class="label">TANGGAL TAYANG</span>
+                        <span class="val">{{ \Carbon\Carbon::parse($booking['date'])->format('d M Y') }}</span>
+                    </div>
+                    <div>
+                        <span class="label">JAM</span>
+                        <span class="val">{{ $booking['time'] }} WIB</span>
+                    </div>
                 </div>
 
                 <div style="display: flex; justify-content: space-between;">

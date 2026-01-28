@@ -5,19 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Movie extends Model
+class Studio extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'title', 
-        'description', 
-        'poster_path', 
-        'status', 
-        'ticket_price',
-        'trailer_url'
-    ];
+    // Izinkan semua kolom diisi (mass assignment)
+    protected $guarded = [];
 
+    // Relasi: Satu Studio punya BANYAK Jadwal Tayang
     public function showtimes()
     {
         return $this->hasMany(Showtime::class);

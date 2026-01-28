@@ -13,6 +13,11 @@
         ::-webkit-scrollbar-track { background: #111; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #555; }
+        .animate-bounce-short { animation: bounce 1s 1; }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
     </style>
 </head>
 <body class="bg-[#111] text-gray-200 font-sans min-h-screen">
@@ -50,7 +55,7 @@
             </div>
         @endif
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-[#1b1b1b] p-6 rounded-xl shadow-lg border-l-4 border-green-500 relative overflow-hidden">
                 <div class="relative z-10">
                     <p class="text-gray-400 text-sm font-medium uppercase tracking-wider">Total Pendapatan</p>
@@ -74,6 +79,28 @@
             </div>
         </div>
 
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <a href="{{ route('studio.create') }}" class="bg-[#1b1b1b] p-6 rounded-xl shadow-lg border border-gray-800 hover:border-blue-500 transition group flex items-center justify-between cursor-pointer">
+                <div>
+                    <h3 class="text-lg font-bold text-white group-hover:text-blue-500 transition"><i class="fa-solid fa-couch mr-2"></i> Manajemen Studio</h3>
+                    <p class="text-sm text-gray-500 mt-1">Tambah studio baru dan atur layout kursi</p>
+                </div>
+                <div class="h-10 w-10 rounded-full bg-blue-900/30 flex items-center justify-center text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <a href="{{ route('showtime.create') }}" class="bg-[#1b1b1b] p-6 rounded-xl shadow-lg border border-gray-800 hover:border-green-500 transition group flex items-center justify-between cursor-pointer">
+                <div>
+                    <h3 class="text-lg font-bold text-white group-hover:text-green-500 transition"><i class="fa-regular fa-calendar-check mr-2"></i> Atur Jadwal Tayang</h3>
+                    <p class="text-sm text-gray-500 mt-1">Set jadwal film ke studio tertentu</p>
+                </div>
+                <div class="h-10 w-10 rounded-full bg-green-900/30 flex items-center justify-center text-green-500 group-hover:bg-green-600 group-hover:text-white transition">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+            </a>
+        </div>
+
         <div class="bg-[#1b1b1b] rounded-xl shadow-xl border border-gray-800 overflow-hidden mb-10">
             <div class="p-6 border-b border-gray-700 flex justify-between items-center">
                 <h2 class="text-xl font-bold text-white">
@@ -87,7 +114,6 @@
                             <th class="px-6 py-4">Pelanggan</th>
                             <th class="px-6 py-4">Film</th>
                             <th class="px-6 py-4 text-center">Kursi</th>
-                            <th class="px-6 py-4 text-center">Jadwal</th>
                             <th class="px-6 py-4">Total Harga</th>
                             <th class="px-6 py-4">Waktu Order</th>
                         </tr>
@@ -97,29 +123,25 @@
                         <tr class="hover:bg-[#222] transition">
                             <td class="px-6 py-4 flex items-center gap-3">
                                 <div class="h-8 w-8 rounded-full bg-blue-900/50 flex items-center justify-center text-blue-400 text-xs font-bold border border-blue-800">
-                                    {{ substr($trx->user_name, 0, 1) }}
+                                    {{ substr($trx->user_name ?? 'U', 0, 1) }}
                                 </div>
                                 <div>
-                                    <div class="font-medium text-white">{{ $trx->user_name }}</div>
-                                    <div class="text-[10px] text-gray-500">{{ $trx->region }}</div>
+                                    <div class="font-medium text-white">{{ $trx->user_name ?? 'User' }}</div>
+                                    <div class="text-[10px] text-gray-500">{{ $trx->order_id }}</div>
                                 </div>
                             </td>
                             <td class="px-6 py-4 font-semibold text-white">{{ $trx->movie_title }}</td>
                             <td class="px-6 py-4 text-center"><span class="bg-gray-800 px-2 py-1 rounded text-xs border border-gray-700">{{ $trx->seats }}</span></td>
-                            <td class="px-6 py-4 text-center">
-                                <div class="text-blue-400 font-bold text-xs bg-blue-900/20 px-2 py-1 rounded border border-blue-900/50 inline-block mb-1">{{ $trx->screening_date }}</div>
-                                <div class="text-xs text-gray-500 font-mono">{{ $trx->screening_time }} WIB</div>
-                            </td>
                             <td class="px-6 py-4 text-green-400 font-mono font-bold">Rp {{ number_format($trx->total_price, 0, ',', '.') }}</td>
                             <td class="px-6 py-4 text-xs text-gray-500">{{ $trx->created_at->format('d/m/Y H:i') }}</td>
                         </tr>
                         @empty
-                        <tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Belum ada transaksi.</td></tr>
+                        <tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">Belum ada transaksi.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-            @if($recentTransactions->hasPages())
+            @if(method_exists($recentTransactions, 'links'))
             <div class="p-4 border-t border-gray-800">{{ $recentTransactions->links() }}</div>
             @endif
         </div>
@@ -142,6 +164,11 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-400 mb-1">Harga Tiket (IDR)</label>
                             <input type="number" name="ticket_price" class="w-full bg-[#222] border border-gray-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="45000" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Link Trailer (YouTube)</label>
+                            <input type="url" name="trailer_url" class="w-full bg-[#222] border border-gray-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="https://www.youtube.com/watch?v=...">
                         </div>
 
                         <div>
@@ -204,7 +231,14 @@
                                     </td>
                                     <td class="px-6 py-4 text-center">
                                         <div class="flex justify-center gap-2">
-                                            <button @click="showEditModal = true; editData = { id: {{ $movie->id }}, title: '{{ addslashes($movie->title) }}', price: {{ $movie->ticket_price }}, status: '{{ $movie->status }}', desc: '{{ addslashes($movie->description) }}' }" 
+                                            <button @click="showEditModal = true; editData = { 
+                                                id: {{ $movie->id }}, 
+                                                title: '{{ addslashes($movie->title) }}', 
+                                                price: {{ $movie->ticket_price }}, 
+                                                status: '{{ $movie->status }}', 
+                                                desc: '{{ addslashes($movie->description) }}',
+                                                trailer: '{{ $movie->trailer_url }}' 
+                                            }" 
                                                 class="text-gray-400 hover:text-blue-500 transition p-2 hover:bg-blue-900/20 rounded-full" title="Edit">
                                                 <i class="fa-solid fa-pen-to-square"></i>
                                             </button>
@@ -246,6 +280,10 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-400 mb-1">Harga Tiket (IDR)</label>
                                     <input type="number" name="ticket_price" x-model="editData.price" class="w-full bg-[#222] border border-gray-700 rounded-lg p-2.5 text-white outline-none focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-400 mb-1">Link Trailer</label>
+                                    <input type="url" name="trailer_url" x-model="editData.trailer" class="w-full bg-[#222] border border-gray-700 rounded-lg p-2.5 text-white outline-none focus:border-blue-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-400 mb-1">Status</label>

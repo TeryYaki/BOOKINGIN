@@ -11,11 +11,18 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('movie_id')->constrained()->onDelete('cascade');
+            
+            // [PERUBAHAN UTAMA DI SINI]
+            // Kita ganti movie_id, date, time, region dengan satu kunci ini:
+            $table->foreignId('showtime_id')->constrained()->onDelete('cascade'); 
+            
             $table->string('order_id')->unique();
-            $table->string('seats'); // Disimpan format "A1,A2"
+            $table->string('seats'); // Tetap simpan "A1,A2"
             $table->bigInteger('total_price');
             $table->string('status')->default('paid'); 
+            
+            // Kolom date, time, region DIHAPUS karena datanya diambil dari showtime_id
+            
             $table->timestamps();
         });
     }

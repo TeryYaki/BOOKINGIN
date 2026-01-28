@@ -103,13 +103,14 @@ class AdminController extends Controller {
         ));
     }
 
-    // --- FUNGSI TAMBAH FILM (UPDATE: Simpan Harga) ---
+   // --- FUNGSI TAMBAH FILM (UPDATE: Simpan Harga & Trailer) ---
     public function store(Request $request) {
         $request->validate([
             'title' => 'required',
             'poster' => 'required|image',
             'status' => 'required',
-            'ticket_price' => 'required|numeric|min:0' // Validasi Harga
+            'ticket_price' => 'required|numeric|min:0', // Validasi Harga
+            'trailer_url' => 'nullable|url' // Validasi URL (Tambahkan koma sebelumnya)
         ]);
 
         $imageName = time().'.'.$request->poster->extension();
@@ -120,12 +121,12 @@ class AdminController extends Controller {
             'description' => $request->description,
             'poster_path' => 'images/movies/'.$imageName,
             'status' => $request->status,
-            'ticket_price' => $request->ticket_price // Simpan ke Database
+            'ticket_price' => $request->ticket_price, // Simpan ke Database
+            'trailer_url' => $request->trailer_url // Simpan URL (Tambahkan koma sebelumnya)
         ]);
         
         return redirect()->back()->with('success', 'Film berhasil ditambahkan!');
     }
-
     // --- FUNGSI EDIT FILM (BARU) ---
     public function update(Request $request, $id) {
         // Validasi input edit

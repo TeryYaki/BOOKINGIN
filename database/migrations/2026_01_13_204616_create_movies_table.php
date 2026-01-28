@@ -15,6 +15,8 @@ return new class extends Migration
             $table->string('poster_path'); // Lokasi Gambar
             $table->enum('status', ['now_showing', 'upcoming']); // Kategori
             $table->timestamps();
+            $table->string('trailer_url')->nullable(); // Untuk menyimpan link YouTube
+            $table->decimal('ticket_price', 10, 2)->default(45000); // Pastikan harga juga ada (opsional jika sudah ada di update lain)
         });
     }
 
