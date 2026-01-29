@@ -33,4 +33,13 @@ class MovieController extends Controller
         // Pastikan folder view bernama 'movies' (huruf kecil)
         return view('movies.index', compact('movies', 'cities'));
     }
+
+            // app/Http/Controllers/MovieController.php
+
+    public function show($id)
+        {
+            $movie = Movie::with(['showtimes.studio'])->findOrFail($id);
+            return view('film', compact('movie'));
+        }
 }
+

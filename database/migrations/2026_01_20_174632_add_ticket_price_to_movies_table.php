@@ -10,12 +10,15 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up()
-    {
+{
+    // Cek apakah kolom ticket_price SUDAH ADA. Jika BELUM, baru tambahkan.
+    if (!Schema::hasColumn('movies', 'ticket_price')) {
         Schema::table('movies', function (Blueprint $table) {
-            // Default harga 45.000 jika tidak diisi
-            $table->integer('ticket_price')->default(45000)->after('description');
+            $table->integer('ticket_price')->default(45000); 
+            // Sesuaikan tipe data/default dengan kodingan asli Anda jika berbeda
         });
     }
+}
 
     public function down()
     {

@@ -14,11 +14,11 @@ public function up()
 {
     Schema::create('studios', function (Blueprint $table) {
         $table->id();
-        $table->string('name');         // Contoh: "Studio 1 - IMAX"
-        $table->string('location');     // Contoh: "Jakarta - Grand Indonesia"
-        $table->integer('total_rows');  // Contoh: 8 baris
-        $table->integer('total_cols');  // Contoh: 10 kolom (Total 80 kursi)
-        $table->json('layout_config')->nullable(); // Opsional: Jika ada lorong/layout aneh
+        $table->string('name');
+        $table->string('city'); // SEBELUMNYA 'location', UBAH JADI 'city'
+        $table->integer('total_rows');
+        $table->integer('total_cols');
+        $table->json('layout_config')->nullable();
         $table->timestamps();
     });
 }

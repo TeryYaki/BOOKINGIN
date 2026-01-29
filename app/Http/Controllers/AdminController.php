@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Movie;
+use App\Models\Studio;
+use App\Models\Showtime;
 use Kreait\Firebase\Factory; 
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator; 
+use DateTime; // Untuk format nama bulan
 
 class AdminController extends Controller {
 
@@ -32,12 +35,19 @@ class AdminController extends Controller {
         }
     }
     
-    public function dashboard() {
-        // 2. AMBIL DATA DARI FIREBASE (Logic tetap sama seperti sebelumnya)
-        $allTickets = [];
-        $totalRevenue = 0;
-        $totalTickets = 0;
+    public function dashboard(Request $request) {
+        // --- 1. SETTING FILTER (Dari Request atau Default) ---
+        $selectedMonth = $request->input('month', date('n')); // Default: Bulan ini
+        $selectedYear  = $request->input('year', date('Y'));  // Default: Tahun ini
+        $filterType    = $request->input('filter_type', 'monthly'); // monthly atau yearly
 
+        // --- 2. SIAPKAN VARIABEL PENAMPUNG ---
+        $allTickets = [];
+        $totalRevenue = 0; // Ini yang akan difilter
+        $totalTickets = 0;
+        $availableYears = []; // Untuk dropdown tahun
+
+        // --- 3. AMBIL DATA DARI FIREBASE ---
         if ($this->firebaseDatabase) {
             $reference = $this->firebaseDatabase->getReference('tickets');
             $snapshot = $reference->getValue();
@@ -46,13 +56,52 @@ class AdminController extends Controller {
                 foreach ($snapshot as $userId => $orders) {
                     foreach ($orders as $orderId => $data) {
                         
+                        // Parse Tanggal Transaksi
+                        // Jika ada 'timestamp' (ms), pakai itu. Jika tidak, pakai now().
+                        $dateObj = isset($data['timestamp']) 
+                                   ? Carbon::createFromTimestamp($data['timestamp'] / 1000) 
+                                   : now();
+                        
+                        $transYear = $dateObj->year;
+                        $transMonth = $dateObj->month;
+
+                        // Kumpulkan Tahun Unik untuk Dropdown
+                        if (!in_array($transYear, $availableYears)) {
+                            $availableYears[] = $transYear;
+                        }
+
+                        // --- LOGIKA FILTER PENDAPATAN ---
+                        // Cek apakah transaksi ini lolos filter?
+                        $isIncluded = false;
+
+                        if ($filterType == 'yearly') {
+                            // Filter Tahunan: Cukup cek tahunnya sama
+                            if ($transYear == $selectedYear) {
+                                $isIncluded = true;
+                            }
+                        } else {
+                            // Filter Bulanan: Cek bulan DAN tahun
+                            if ($transYear == $selectedYear && $transMonth == $selectedMonth) {
+                                $isIncluded = true;
+                            }
+                        }
+
+                        // Jika lolos filter, tambahkan ke Total Revenue
+                        if ($isIncluded) {
+                            $totalRevenue += ($data['price'] ?? 0);
+                            // Opsional: Hitung tiket yang terjual pada periode ini saja
+                            // $totalTickets++; 
+                        }
+                        
+                        // Note: $totalTickets biasanya dihitung total semua (tanpa filter) 
+                        // atau bisa juga difilter. Di sini saya hitung total global agar data tabel tetap lengkap.
+                        $totalTickets++;
+
+
+                        // Format Data untuk Tabel Riwayat (Tampilkan SEMUA riwayat, sorting nanti)
                         $seats = is_array($data['seats'] ?? []) 
                                  ? implode(', ', $data['seats'] ?? []) 
                                  : ($data['seats'] ?? '-');
-
-                        $date = isset($data['timestamp']) 
-                                ? Carbon::createFromTimestamp($data['timestamp'] / 1000) 
-                                : now();
 
                         $allTickets[] = (object) [
                             'order_id'    => $data['order_id'] ?? $orderId,
@@ -63,17 +112,18 @@ class AdminController extends Controller {
                             'region'      => $data['region'] ?? '-',
                             'screening_date' => $data['date'] ?? '-', 
                             'screening_time' => $data['time'] ?? '-',
-                            'created_at'  => $date
+                            'created_at'  => $dateObj
                         ];
-
-                        $totalRevenue += ($data['price'] ?? 0);
-                        $totalTickets++;
                     }
                 }
             }
         }
 
-        // Sorting & Pagination
+        // Urutkan Tahun Descending (2025, 2024...)
+        rsort($availableYears);
+        if (empty($availableYears)) $availableYears = [date('Y')];
+
+        // --- 4. SORTING & PAGINATION (Untuk Tabel Bawah) ---
         usort($allTickets, function($a, $b) {
             return $b->created_at <=> $a->created_at; 
         });
@@ -90,23 +140,29 @@ class AdminController extends Controller {
             ['path' => LengthAwarePaginator::resolveCurrentPath()]
         );
 
-        // Ambil Data Film (SQL Local)
+        // --- 5. STATISTIK LAIN (SQL LOCAL) ---
         $movies = Movie::latest()->get();
         $totalMovies = Movie::count();
+        $totalStudios = Studio::count(); // Pastikan model Studio diimport
+        $totalShowtimes = Showtime::count(); // Pastikan model Showtime diimport
 
         return view('admin.dashboard', compact(
             'movies', 
-            'totalRevenue', 
-            'totalTickets', 
-            'totalMovies', 
-            'recentTransactions'
+            'totalRevenue', // Sudah difilter
+            'totalTickets', // Global
+            'totalMovies',
+            'totalStudios',
+            'totalShowtimes',
+            'recentTransactions',
+            'selectedMonth',
+            'selectedYear',
+            'availableYears'
         ));
     }
 
-   // --- FUNGSI TAMBAH FILM (UPDATE: Simpan Harga & Trailer) ---
+   // --- FUNGSI TAMBAH FILM ---
     public function store(Request $request)
     {
-        // 1. Validasi
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -116,26 +172,20 @@ class AdminController extends Controller {
             'trailer_url' => 'nullable|url'
         ]);
 
-        // 2. Upload Gambar
         if ($request->hasFile('poster')) {
             $imageName = time() . '.' . $request->poster->extension();
             $request->poster->move(public_path('Images/movies'), $imageName);
-            
-            // Simpan path string ke database
             $validatedData['poster_path'] = 'Images/movies/' . $imageName;
         }
 
-        // 3. HAPUS field 'poster' (file object) agar tidak ikut masuk query SQL
         unset($validatedData['poster']);
-
-        // 4. Simpan ke Database
         Movie::create($validatedData);
 
         return redirect()->route('admin.dashboard')->with('success', 'Film berhasil ditambahkan!');
     }
-    // --- FUNGSI EDIT FILM (BARU) ---
+
+    // --- FUNGSI EDIT FILM ---
     public function update(Request $request, $id) {
-        // Validasi input edit
         $request->validate([
             'title' => 'required',
             'status' => 'required',
@@ -144,7 +194,6 @@ class AdminController extends Controller {
 
         $movie = Movie::findOrFail($id);
 
-        // Data yang akan diupdate
         $dataToUpdate = [
             'title' => $request->title,
             'description' => $request->description,
@@ -152,26 +201,27 @@ class AdminController extends Controller {
             'ticket_price' => $request->ticket_price
         ];
 
-        // Cek jika admin mengupload poster baru (Optional)
         if ($request->hasFile('poster')) {
             $imageName = time().'.'.$request->poster->extension();
-            $request->poster->move(public_path('images/movies'), $imageName);
-            unset($validatedData['poster']); // Hapus raw file object agar tidak ikut dimasukkan ke query SQL
-            Movie::create($validatedData);
-            
-            // Update path poster baru
-            $dataToUpdate['poster_path'] = 'images/movies/'.$imageName;
+            $request->poster->move(public_path('Images/movies'), $imageName);
+            $dataToUpdate['poster_path'] = 'Images/movies/'.$imageName;
         }
 
-        // Lakukan update ke database
         $movie->update($dataToUpdate);
 
-        return redirect()->back()->with('success', 'Data film berhasil diperbarui!');
+        return redirect()->route('admin.dashboard')->with('success', 'Data film berhasil diperbarui!');
     }
 
     // --- FUNGSI HAPUS FILM ---
     public function destroy($id) {
-        Movie::destroy($id);
-        return redirect()->back()->with('success', 'Film berhasil dihapus!');
+        $movie = Movie::findOrFail($id);
+        
+        // Opsional: Hapus file gambar poster jika ada
+        if ($movie->poster_path && file_exists(public_path($movie->poster_path))) {
+            @unlink(public_path($movie->poster_path));
+        }
+
+        $movie->delete();
+        return redirect()->route('admin.dashboard')->with('success', 'Film berhasil dihapus!');
     }
 }

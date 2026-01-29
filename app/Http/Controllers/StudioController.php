@@ -2,29 +2,43 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Studio; // Pastikan Model diimport
 use Illuminate\Http\Request;
-use App\Models\Studio;
 
 class StudioController extends Controller
 {
-    // Tampilkan Form Tambah Studio
+    // Ubah method create menjadi seperti ini:
     public function create()
     {
-        return view('admin.studios.create');
+        // Ambil semua data studio urut dari yang terbaru
+        $studios = Studio::latest()->get(); 
+        return view('admin.Studios.create', compact('studios'));
     }
 
-    // Simpan ke Database
     public function store(Request $request)
     {
-        $request->validate([
+        // ... (Kode store Anda yang lama tetap sama) ...
+        // Pastikan return-nya: return redirect()->route('studio.create')->with('success', '...');
+        // Agar kembali ke halaman list setelah simpan.
+        
+        $validated = $request->validate([
             'name' => 'required',
             'city' => 'required',
-            'total_rows' => 'required|integer|min:1',
-            'total_cols' => 'required|integer|min:1',
+            'total_rows' => 'required|integer',
+            'total_cols' => 'required|integer',
         ]);
 
-        Studio::create($request->all());
+        Studio::create($validated);
 
-        return redirect()->route('admin.dashboard')->with('success', 'Studio berhasil dibuat!');
+        return redirect()->route('studio.create')->with('success', 'Studio berhasil ditambahkan!');
+    }
+
+    // Tambahkan method ini:
+    public function destroy($id)
+    {
+        $studio = Studio::findOrFail($id);
+        $studio->delete();
+
+        return redirect()->route('studio.create')->with('success', 'Studio berhasil dihapus!');
     }
 }

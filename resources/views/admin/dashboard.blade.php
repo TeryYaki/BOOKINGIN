@@ -18,6 +18,12 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-5px); }
         }
+        /* Custom Select Arrow Hide */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
     </style>
 </head>
 <body class="bg-[#111] text-gray-200 font-sans min-h-screen">
@@ -56,26 +62,83 @@
         @endif
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-[#1b1b1b] p-6 rounded-xl shadow-lg border-l-4 border-green-500 relative overflow-hidden">
-                <div class="relative z-10">
+            
+            <div class="bg-[#1b1b1b] p-6 rounded-xl shadow-lg border-l-4 border-green-500 relative overflow-hidden group">
+                
+                <div class="absolute top-4 right-4 z-20">
+                    <form action="{{ route('admin.dashboard') }}" method="GET" 
+                          class="flex items-center gap-2 bg-black/40 backdrop-blur-md p-1.5 rounded-lg border border-white/10 shadow-sm transition-all hover:border-white/30">
+                        
+                        <div class="text-gray-400 pl-2">
+                            <i class="fa-solid fa-filter text-[10px]"></i>
+                        </div>
+
+                        <div class="relative group">
+                            <select name="filter_type" onchange="this.form.submit()" 
+                                    class="bg-transparent text-[11px] font-medium text-white pl-2 pr-5 py-1 rounded cursor-pointer focus:outline-none hover:text-green-400 transition">
+                                <option value="monthly" {{ request('filter_type') == 'monthly' ? 'selected' : '' }} class="bg-[#222]">Bulanan</option>
+                                <option value="yearly" {{ request('filter_type') == 'yearly' ? 'selected' : '' }} class="bg-[#222]">Tahunan</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute right-0 top-1.5 text-[8px] text-gray-500 pointer-events-none group-hover:text-white"></i>
+                        </div>
+
+                        <div class="h-3 w-[1px] bg-gray-600"></div>
+
+                        @if(request('filter_type') != 'yearly')
+                            <div class="relative group">
+                                <select name="month" onchange="this.form.submit()" 
+                                        class="bg-transparent text-[11px] font-medium text-white pl-2 pr-5 py-1 rounded cursor-pointer focus:outline-none hover:text-green-400 transition">
+                                    @foreach(range(1, 12) as $m)
+                                        <option value="{{ $m }}" {{ $selectedMonth == $m ? 'selected' : '' }} class="bg-[#222]">
+                                            {{ \DateTime::createFromFormat('!m', $m)->format('M') }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <i class="fa-solid fa-chevron-down absolute right-0 top-1.5 text-[8px] text-gray-500 pointer-events-none group-hover:text-white"></i>
+                            </div>
+                        @endif
+
+                        <div class="relative group">
+                            <select name="year" onchange="this.form.submit()" 
+                                    class="bg-transparent text-[11px] font-medium text-white pl-2 pr-5 py-1 rounded cursor-pointer focus:outline-none hover:text-green-400 transition">
+                                @foreach($availableYears as $yr)
+                                    <option value="{{ $yr }}" {{ $selectedYear == $yr ? 'selected' : '' }} class="bg-[#222]">{{ $yr }}</option>
+                                @endforeach
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute right-0 top-1.5 text-[8px] text-gray-500 pointer-events-none group-hover:text-white"></i>
+                        </div>
+                    </form>
+                </div>
+                <div class="relative z-10 mt-2">
                     <p class="text-gray-400 text-sm font-medium uppercase tracking-wider">Total Pendapatan</p>
                     <h3 class="text-3xl font-bold text-white mt-1">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</h3>
+                    
+                    <p class="text-[10px] text-green-400 mt-1 font-mono flex items-center gap-1">
+                        @if(request('filter_type') == 'yearly')
+                            <i class="fa-solid fa-calendar-check"></i> Sepanjang Tahun {{ $selectedYear }}
+                        @else
+                            <i class="fa-solid fa-calendar-day"></i> Bulan {{ \DateTime::createFromFormat('!m', $selectedMonth)->format('F') }} {{ $selectedYear }}
+                        @endif
+                    </p>
                 </div>
-                <i class="fa-solid fa-money-bill-wave absolute right-4 bottom-4 text-green-500/10 text-6xl"></i>
+                
+                <i class="fa-solid fa-money-bill-wave absolute -right-2 -bottom-4 text-green-500/10 text-8xl group-hover:scale-110 transition duration-500 pointer-events-none"></i>
             </div>
-            <div class="bg-[#1b1b1b] p-6 rounded-xl shadow-lg border-l-4 border-blue-500 relative overflow-hidden">
+
+            <div class="bg-[#1b1b1b] p-6 rounded-xl shadow-lg border-l-4 border-blue-500 relative overflow-hidden group">
                 <div class="relative z-10">
                     <p class="text-gray-400 text-sm font-medium uppercase tracking-wider">Tiket Terjual</p>
                     <h3 class="text-3xl font-bold text-white mt-1">{{ $totalTickets }} <span class="text-sm font-normal text-gray-500">Transaksi</span></h3>
                 </div>
-                <i class="fa-solid fa-ticket absolute right-4 bottom-4 text-blue-500/10 text-6xl"></i>
+                <i class="fa-solid fa-ticket absolute right-4 bottom-4 text-blue-500/10 text-6xl group-hover:scale-110 transition duration-500"></i>
             </div>
-            <div class="bg-[#1b1b1b] p-6 rounded-xl shadow-lg border-l-4 border-purple-500 relative overflow-hidden">
+
+            <div class="bg-[#1b1b1b] p-6 rounded-xl shadow-lg border-l-4 border-purple-500 relative overflow-hidden group">
                 <div class="relative z-10">
                     <p class="text-gray-400 text-sm font-medium uppercase tracking-wider">Film Aktif</p>
                     <h3 class="text-3xl font-bold text-white mt-1">{{ $totalMovies }} <span class="text-sm font-normal text-gray-500">Judul</span></h3>
                 </div>
-                <i class="fa-solid fa-film absolute right-4 bottom-4 text-purple-500/10 text-6xl"></i>
+                <i class="fa-solid fa-film absolute right-4 bottom-4 text-purple-500/10 text-6xl group-hover:scale-110 transition duration-500"></i>
             </div>
         </div>
 
@@ -288,8 +351,8 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-400 mb-1">Status</label>
                                     <select name="status" x-model="editData.status" class="w-full bg-[#222] border border-gray-700 rounded-lg p-2.5 text-white outline-none focus:border-blue-500">
-                                        <option value="now_showing">🟢 Now Showing</option>
-                                        <option value="upcoming">🟡 Upcoming</option>
+                                            <option value="now_showing">🟢 Now Showing</option>
+                                            <option value="upcoming">🟡 Upcoming</option>
                                     </select>
                                 </div>
                                 <div>

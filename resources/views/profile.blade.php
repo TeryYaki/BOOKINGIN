@@ -58,7 +58,7 @@
         <div class="logo">BOOKINGIN</div>
         <div>
             <a href="{{ route('home') }}">Beranda</a>
-            <a href="{{ route('movies') }}">Movies</a>
+            <a href="{{ route('movies.index') }}">Movies</a>
             <a href="{{ route('profile') }}" style="color: #3b82f6;">Profile</a>
         </div>
     </nav>

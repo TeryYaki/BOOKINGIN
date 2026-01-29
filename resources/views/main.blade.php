@@ -328,7 +328,7 @@
         <div class="logo">BOOKINGIN</div>
         <nav>
             <a href="{{ route('home') }}" class="nav-link active">Beranda</a>
-            <a href="{{ route('movies') }}" class="nav-link">Movies</a>
+            <a href="{{ route('movies.index') }}" class="nav-link">Movies</a>
 
             @guest
                 <a href="{{ route('register') }}" class="btn-auth btn-register">Daftar</a>
@@ -433,7 +433,7 @@
                         Lupakan antrean panjang. Dengan <strong>Bookingin</strong>, kursi favorit Anda hanya berjarak satu klik. 
                         Kami menyediakan integrasi langsung dengan bioskop terkemuka untuk memastikan kenyamanan Anda.
                     </p>
-                    <a href="{{ route('movies') }}" style="color: var(--brand-blue); text-decoration:none; font-weight:700; display:flex; align-items:center; gap:10px;">
+                    <a href="{{ route('movies.index') }}" style="color: var(--brand-blue); text-decoration:none; font-weight:700; display:flex; align-items:center; gap:10px;">
                         Lihat Semua Film <i class="fa-solid fa-arrow-right"></i>
                     </a>
                 </div>
@@ -470,7 +470,7 @@
 
     <footer>
         <p style="color: var(--text-muted); font-size: 0.9rem;">
-            © 2025 Bookingin. Dibuat dengan <i class="fa-solid fa-heart" style="color: var(--brand-red);"></i> untuk pecinta film.
+            © 2025 Bookingin. Dibuat oleh PT. Santai Digital<i class="fa-solid fa-heart" style="color: var(--brand-red);"></i>
         </p>
     </footer>
 

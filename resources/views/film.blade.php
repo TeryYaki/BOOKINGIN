@@ -94,7 +94,7 @@
         <div class="logo">BOOKINGIN</div>
         <nav>
             <a href="{{ route('home') }}" class="nav-link">Beranda</a>
-            <a href="{{ route('movies') }}" class="nav-link" style="color:white">Movies</a>
+            <a href="{{ route('movies.index') }}" class="nav-link" style="color:white">Movies</a>
             @guest <a href="{{ route('login') }}" class="btn-login">Masuk</a> @endguest
             @auth
                 <div class="user-menu">
@@ -144,13 +144,13 @@
                 <div class="input-group">
                     <label>Pilih Lokasi</label>
                     <select id="regionSelect" class="city-select" onchange="renderTimeButtons()">
-                        </select>
+                    </select>
                 </div>
 
                 <div class="input-group">
                     <label>Pilih Tanggal</label>
                     <div class="selection-grid" id="dateContainer">
-                        </div>
+                    </div>
                 </div>
 
                 <div class="input-group">
@@ -200,16 +200,35 @@
     </form>
 
     <script>
-        // --- 0. INISIALISASI DATA ---
+        // --- 0. INISIALISASI DATA & DEBUGGING ---
+        // Load data dari controller
+        const rawShowtimes = @json($movie->showtimes->load('studio'));
+        
+        // Debugging: Cek di Console Browser (F12) apakah data masuk
+        console.log("Data Jadwal:", rawShowtimes);
+
+        if (!rawShowtimes || rawShowtimes.length === 0) {
+            console.warn("Tidak ada jadwal tayang untuk film ini.");
+        }
+
         let selectedDate = "";
-        let selectedShowtime = null; // Object showtime yang dipilih
+        let selectedShowtime = null;
         let selectedSeats = [];
 
-        // Ambil daftar kota unik dari data showtimes
-        const uniqueCities = [...new Set(rawShowtimes.map(item => item.studio.city))];
+        // Ambil elemen DOM
         const regionSelect = document.getElementById('regionSelect');
+        const dateContainer = document.getElementById('dateContainer');
+        const timeContainer = document.getElementById('timeContainer');
 
-        // Render Pilihan Kota
+        // --- 1. SETUP PILIHAN KOTA ---
+        // Ambil kota unik, filter yang studionya tidak null
+        const uniqueCities = [...new Set(
+            rawShowtimes
+            .filter(item => item.studio) // Jaga-jaga jika studio terhapus
+            .map(item => item.studio.city)
+        )];
+
+        regionSelect.innerHTML = ""; // Bersihkan dulu
         if(uniqueCities.length > 0) {
             uniqueCities.forEach(city => {
                 let opt = document.createElement('option');
@@ -217,25 +236,36 @@
                 opt.innerText = city;
                 regionSelect.appendChild(opt);
             });
+            // Auto trigger render saat pertama load
+            setTimeout(() => { renderTimeButtons(); }, 100);
         } else {
             let opt = document.createElement('option');
-            opt.innerText = "Belum ada jadwal";
+            opt.innerText = "Tidak ada jadwal tersedia";
             regionSelect.appendChild(opt);
         }
 
-        // --- 1. GENERATE TANGGAL (Hari ini + 5 hari) ---
-        const dateContainer = document.getElementById('dateContainer');
+        // --- 2. GENERATE TANGGAL (Hari ini + 5 hari) ---
         const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         const today = new Date();
+        
+        // Reset container
+        dateContainer.innerHTML = "";
 
         for (let i = 0; i < 6; i++) {
             let d = new Date(today);
             d.setDate(today.getDate() + i);
-            let fullDate = d.toISOString().split('T')[0]; // YYYY-MM-DD
+            
+            // Format YYYY-MM-DD manual agar sesuai zona waktu lokal (WIB)
+            // Menggunakan toISOString() kadang error karena konversi ke UTC
+            let year = d.getFullYear();
+            let month = ("0" + (d.getMonth() + 1)).slice(-2);
+            let day = ("0" + d.getDate()).slice(-2);
+            let fullDate = `${year}-${month}-${day}`;
+
             let dayName = i === 0 ? "Hari Ini" : days[d.getDay()];
 
             let btn = document.createElement('button');
-            btn.className = 'select-btn';
+            btn.className = 'select-btn date-btn'; // Tambah class date-btn
             
             // Auto select hari ini
             if(i === 0) { 
@@ -246,41 +276,56 @@
             btn.innerHTML = `<div style="font-size:0.8rem; opacity:0.7;">${dayName}</div><div style="font-size:1.1rem;">${d.getDate()}</div>`;
             
             btn.onclick = function() {
-                document.querySelectorAll('#dateContainer .select-btn').forEach(b => b.classList.remove('active'));
+                // Reset semua tombol tanggal
+                document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
+                
                 selectedDate = fullDate;
-                renderTimeButtons(); // Render ulang jam saat tanggal ganti
+                console.log("Tanggal dipilih:", selectedDate);
+                renderTimeButtons(); // Render ulang jam
             };
             
             dateContainer.appendChild(btn);
         }
 
-        // --- 2. RENDER TOMBOL WAKTU (DINAMIS DARI DB) ---
+        // --- 3. RENDER TOMBOL WAKTU ---
         function renderTimeButtons() {
-            const timeContainer = document.getElementById('timeContainer');
             const selectedCity = regionSelect.value;
             timeContainer.innerHTML = '';
             selectedShowtime = null; // Reset pilihan
+            
+            console.log(`Mencari jadwal: Tanggal ${selectedDate}, Kota ${selectedCity}`);
 
-            // Filter jadwal yang sesuai Tanggal & Kota
-            const availableShowtimes = rawShowtimes.filter(s => 
-                s.date === selectedDate && s.studio.city === selectedCity
-            );
+            // Filter jadwal
+            const availableShowtimes = rawShowtimes.filter(s => {
+                // Pastikan s.studio ada untuk menghindari error
+                return s.studio && s.date === selectedDate && s.studio.city === selectedCity;
+            });
+
+            console.log("Jadwal ditemukan:", availableShowtimes);
 
             if (availableShowtimes.length === 0) {
-                timeContainer.innerHTML = '<span style="color:var(--text-muted); width:100%; text-align:center;">Tidak ada jadwal di tanggal/lokasi ini.</span>';
+                timeContainer.innerHTML = '<span style="color:var(--text-muted); width:100%; text-align:center; padding:20px;">Tidak ada jadwal di tanggal/lokasi ini.</span>';
                 return;
             }
 
-            // Validasi Jam Lewat (Hanya untuk Hari Ini)
+            // Urutkan berdasarkan jam mulai
+            availableShowtimes.sort((a, b) => a.start_time.localeCompare(b.start_time));
+
+            // Validasi Jam Lewat
             const now = new Date();
-            const isToday = selectedDate === new Date().toISOString().split('T')[0];
+            // Format tanggal hari ini YYYY-MM-DD lokal
+            let nowYear = now.getFullYear();
+            let nowMonth = ("0" + (now.getMonth() + 1)).slice(-2);
+            let nowDay = ("0" + now.getDate()).slice(-2);
+            const todayStr = `${nowYear}-${nowMonth}-${nowDay}`;
+            
+            const isToday = selectedDate === todayStr;
 
             availableShowtimes.forEach(showtime => {
-                // Parse jam mulai (misal "14:00:00" -> ambil 14:00)
-                const timeString = showtime.start_time.substring(0, 5); 
+                const timeString = showtime.start_time.substring(0, 5); // 14:00
                 
-                // Cek apakah waktu sudah lewat
+                // Cek waktu lewat
                 let isDisabled = false;
                 if (isToday) {
                     const [h, m] = timeString.split(':').map(Number);
@@ -291,11 +336,10 @@
 
                 let btn = document.createElement('button');
                 btn.className = 'select-btn time-btn';
-                btn.style.minWidth = '120px';
+                btn.style.minWidth = '140px';
                 
-                // Tampilan Tombol: "14:00 - Studio 1"
                 btn.innerHTML = `
-                    <div style="font-size:1.1rem;">${timeString}</div>
+                    <div style="font-size:1.2rem; font-weight:bold;">${timeString}</div>
                     <div style="font-size:0.75rem; opacity:0.8;">${showtime.studio.name}</div>
                 `;
 
@@ -303,15 +347,15 @@
                     btn.disabled = true;
                     btn.style.opacity = '0.3';
                     btn.style.cursor = 'not-allowed';
+                    btn.style.background = '#333';
+                    btn.title = "Waktu sudah lewat";
                 } else {
                     btn.onclick = function() {
                         document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
-                        
-                        // Set Showtime Terpilih
                         selectedShowtime = showtime;
                         
-                        // Update tampilan harga
+                        // Update Harga
                         document.getElementById('priceDisplay').innerText = "IDR " + new Intl.NumberFormat('id-ID').format(showtime.price);
                     };
                 }
@@ -320,35 +364,43 @@
             });
         }
 
-        // Panggil sekali saat load
-        renderTimeButtons();
-
-        // --- 3. BUKA MODAL & RENDER KURSI ---
+        // --- 4. MODAL & SEATS ---
         const modal = document.getElementById('seatModal');
         const seatsContainer = document.getElementById('seatsContainer');
+        let occupiedSeats = [];
 
-        function checkAndOpenModal() {
-            if (!selectedShowtime) { alert("Mohon pilih waktu tayang terlebih dahulu."); return; }
+        async function checkAndOpenModal() {
+            @guest
+                window.location.href = "{{ route('login') }}";
+                return;
+            @endguest
+
+            if (!selectedShowtime) { 
+                alert("Mohon pilih jam tayang dan studio terlebih dahulu."); 
+                return; 
+            }
             
-            // Set Info Modal
             document.getElementById('modalStudioName').innerText = selectedShowtime.studio.name;
             document.getElementById('modalTime').innerText = selectedShowtime.start_time.substring(0,5) + " WIB";
 
-            // Fetch Data Kursi Terisi
-            fetchOccupiedSeats(selectedShowtime.id).then(() => {
-                modal.style.display = 'flex';
-                renderSeats();
-            });
+            // Tampilkan modal dulu (loading state)
+            modal.style.display = 'flex';
+            seatsContainer.innerHTML = '<p style="color:white;">Memuat kursi...</p>';
+
+            // Fetch Data Kursi
+            await fetchOccupiedSeats(selectedShowtime.id);
+            renderSeats();
         }
 
-        // [BARU] Fetch API menggunakan showtime_id
-        let occupiedSeats = [];
         async function fetchOccupiedSeats(showtimeId) {
             try {
-                const response = await fetch(`{{ route('api.seats') }}?showtime_id=${showtimeId}`);
-                occupiedSeats = await response.json(); // Array ["A1", "B2"] atau ["1", "2"]
+                // Pastikan route API ini ada. Jika belum ada, array kosong dulu.
+                const url = `{{ url('/api/occupied-seats') }}?showtime_id=${showtimeId}`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('API Error');
+                occupiedSeats = await response.json(); 
             } catch (error) {
-                console.error("Error fetching seats:", error);
+                console.log("Info: API kursi belum tersedia/error, menganggap semua kursi kosong.");
                 occupiedSeats = [];
             }
         }
@@ -357,30 +409,38 @@
             seatsContainer.innerHTML = '';
             selectedSeats = [];
             
-            // Ambil Layout dari Studio
             const rows = selectedShowtime.studio.total_rows;
             const cols = selectedShowtime.studio.total_cols;
             
-            // Update CSS Grid agar sesuai jumlah kolom
             seatsContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 
+            // Konversi occupiedSeats ke string agar aman
             const occupiedSet = new Set(occupiedSeats.map(String));
 
             let totalSeats = rows * cols;
             for (let i = 1; i <= totalSeats; i++) {
                 let seat = document.createElement('div');
                 seat.className = 'seat';
-                seat.innerText = i; // Bisa diganti logika A1, A2 nanti
+                
+                // Buat Label Kursi (Contoh: A1, A2... B1, B2)
+                // Logika: Baris A = 0, B = 1, dst.
+                let rowIndex = Math.ceil(i / cols) - 1; 
+                let colIndex = (i - 1) % cols + 1;
+                let rowChar = String.fromCharCode(65 + rowIndex); // 65 = A
+                let seatLabel = rowChar + colIndex;
 
-                if (occupiedSet.has(String(i))) {
+                seat.innerText = seatLabel; 
+                seat.style.fontSize = '0.7rem'; // Kecilkan font biar muat
+
+                if (occupiedSet.has(String(i)) || occupiedSet.has(seatLabel)) {
                     seat.classList.add('occupied');
                 } else {
                     seat.onclick = function() {
                         seat.classList.toggle('selected');
                         if (seat.classList.contains('selected')) {
-                            selectedSeats.push(i);
+                            selectedSeats.push(seatLabel); // Simpan label (A1) atau ID (i)
                         } else {
-                            selectedSeats = selectedSeats.filter(s => s !== i);
+                            selectedSeats = selectedSeats.filter(s => s !== seatLabel);
                         }
                     }
                 }
@@ -391,11 +451,11 @@
         function closeModal() { modal.style.display = 'none'; }
         window.onclick = function(e) { if(e.target == modal) closeModal(); }
 
-        // --- 4. SUBMIT FORM ---
         function confirmBooking() {
             if (selectedSeats.length === 0) { alert("Pilih minimal 1 kursi!"); return; }
 
             document.getElementById('showtimeIdInput').value = selectedShowtime.id;
+            // Kirim data kursi yang dipisahkan koma
             document.getElementById('seatsInput').value = selectedSeats.join(',');
             
             document.getElementById('bookingForm').submit();
