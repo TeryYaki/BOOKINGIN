@@ -104,28 +104,34 @@ class AdminController extends Controller {
     }
 
    // --- FUNGSI TAMBAH FILM (UPDATE: Simpan Harga & Trailer) ---
-    public function store(Request $request) {
-        $request->validate([
-            'title' => 'required',
-            'poster' => 'required|image',
-            'status' => 'required',
-            'ticket_price' => 'required|numeric|min:0', // Validasi Harga
-            'trailer_url' => 'nullable|url' // Validasi URL (Tambahkan koma sebelumnya)
+    public function store(Request $request)
+    {
+        // 1. Validasi
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'poster' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'status' => 'required|in:now_showing,upcoming',
+            'ticket_price' => 'required|numeric|min:0',
+            'trailer_url' => 'nullable|url'
         ]);
 
-        $imageName = time().'.'.$request->poster->extension();
-        $request->poster->move(public_path('images/movies'), $imageName);
+        // 2. Upload Gambar
+        if ($request->hasFile('poster')) {
+            $imageName = time() . '.' . $request->poster->extension();
+            $request->poster->move(public_path('Images/movies'), $imageName);
+            
+            // Simpan path string ke database
+            $validatedData['poster_path'] = 'Images/movies/' . $imageName;
+        }
 
-        Movie::create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'poster_path' => 'images/movies/'.$imageName,
-            'status' => $request->status,
-            'ticket_price' => $request->ticket_price, // Simpan ke Database
-            'trailer_url' => $request->trailer_url // Simpan URL (Tambahkan koma sebelumnya)
-        ]);
-        
-        return redirect()->back()->with('success', 'Film berhasil ditambahkan!');
+        // 3. HAPUS field 'poster' (file object) agar tidak ikut masuk query SQL
+        unset($validatedData['poster']);
+
+        // 4. Simpan ke Database
+        Movie::create($validatedData);
+
+        return redirect()->route('admin.dashboard')->with('success', 'Film berhasil ditambahkan!');
     }
     // --- FUNGSI EDIT FILM (BARU) ---
     public function update(Request $request, $id) {

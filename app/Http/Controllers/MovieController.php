@@ -12,26 +12,25 @@ class MovieController extends Controller
     {
         $query = Movie::query();
 
-        // 1. Filter Judul
+        // 1. Filter Judul (Search)
         if ($request->filled('q')) {
             $query->where('title', 'like', '%' . $request->q . '%');
         }
 
-        // 2. Filter Lokasi
+        // 2. Filter Lokasi (Cari film yang tayang di kota X)
         if ($request->filled('location')) {
             $query->whereHas('showtimes.studio', function($q) use ($request) {
                 $q->where('city', $request->location);
             });
         }
 
-        // 3. Eksekusi dengan Optimasi Eager Loading (Nested)
-        // Memuat 'showtimes' DAN 'studio' sekaligus untuk menghindari query berulang di view
+        // 3. Eksekusi Query (Optimasi: Load showtimes DAN studio sekaligus)
         $movies = $query->with(['showtimes.studio'])->latest()->get(); 
         
-        // 4. Data untuk Dropdown Filter
+        // 4. Ambil daftar kota unik untuk dropdown
         $cities = Studio::select('city')->distinct()->orderBy('city')->pluck('city');
 
-        // Pastikan nama folder view sesuai (Disarankan rename folder 'Movies' jadi 'movies' kecil)
-        return view('Movies.index', compact('movies', 'cities'));
+        // Pastikan folder view bernama 'movies' (huruf kecil)
+        return view('movies.index', compact('movies', 'cities'));
     }
 }
