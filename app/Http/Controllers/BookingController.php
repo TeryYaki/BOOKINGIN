@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Transaction;
-use App\Models\Showtime; // [PENTING] Pakai Model Showtime
+use App\Models\Showtime; 
 use Illuminate\Support\Facades\Auth;
 use Kreait\Firebase\Factory;
+use Illuminate\Support\Facades\Validator; // [DITAMBAHKAN] Untuk cek validasi
 
 class BookingController extends Controller
 {
@@ -14,77 +15,105 @@ class BookingController extends Controller
 
     public function __construct()
     {
-        // ... (Kode koneksi Firebase sama seperti sebelumnya, tidak berubah) ...
         $serviceAccountPath = base_path('firebase_credentials.json');
+        
         if (file_exists($serviceAccountPath)) {
             $databaseUri = 'https://bookingin-eb994-default-rtdb.asia-southeast1.firebasedatabase.app/'; 
             try {
-                $factory = (new Factory)->withServiceAccount($serviceAccountPath)->withDatabaseUri($databaseUri);
+                $factory = (new Factory)
+                    ->withServiceAccount($serviceAccountPath)
+                    ->withDatabaseUri($databaseUri);
                 $this->firebaseDatabase = $factory->createDatabase();
-            } catch (\Throwable $e) { $this->firebaseDatabase = null; }
+            } catch (\Throwable $e) { 
+                $this->firebaseDatabase = null; 
+            }
+        } else {
+            $this->firebaseDatabase = null;
         }
     }
 
-    // [API] Cek Kursi Terisi berdasarkan ID JADWAL (Lebih simpel & akurat)
+    // [API] Cek Kursi Terisi
     public function getOccupiedSeats(Request $request) {
         $showtimeId = $request->showtime_id;
 
-        // Cukup cari transaksi di showtime ini
+        if (!$showtimeId) {
+            return response()->json([]);
+        }
+
+        // [PERBAIKAN] Tambahkan ->where('status', 'paid') 
+        // Agar hanya kursi yang "SUKSES DIBAYAR" yang diblokir (abu-abu)
         $occupied = Transaction::where('showtime_id', $showtimeId)
+            ->where('status', 'paid') 
             ->pluck('seats')
             ->toArray();
 
         $allSeats = [];
         foreach ($occupied as $seatString) {
-            $seats = explode(',', $seatString);
-            $allSeats = array_merge($allSeats, $seats);
+            $cleanString = str_replace(['"', "'", '[', ']', ' '], '', $seatString);
+            $seats = explode(',', $cleanString);
+            
+            foreach($seats as $s) {
+                if(!empty($s)) {
+                    $allSeats[] = strtoupper($s); 
+                }
+            }
         }
 
-        return response()->json($allSeats);
+        return response()->json(array_values(array_unique($allSeats)));
     }
 
-    // 1. PROSES DATA
+    // 1. PROSES DATA DENGAN PENDETEKSI ERROR SUPER KETAT
     public function process(Request $request)
     {
-        // Validasi: Sekarang kita cuma butuh showtime_id dan seats
-        $request->validate([
+        // [PERBAIKAN 1]: Cek apakah ada data kursi/jadwal yang kosong!
+        $validator = Validator::make($request->all(), [
             'showtime_id' => 'required|exists:showtimes,id',
             'seats'       => 'required',
         ]);
 
-        // Ambil Data Jadwal Lengkap (termasuk Film & Studio)
-        $showtime = Showtime::with(['movie', 'studio'])->findOrFail($request->showtime_id);
-        
-        $requestedSeats = explode(',', $request->seats);
-
-        // Validasi Double Booking (Cek MySQL)
-        $existing = Transaction::where('showtime_id', $showtime->id)->get();
-        foreach($existing as $trans) {
-            $booked = explode(',', $trans->seats);
-            if(array_intersect($requestedSeats, $booked)) {
-                return redirect()->back()->with('error', 'Kursi sudah terisi!');
-            }
+        if ($validator->fails()) {
+            // Jika validasi gagal (kursi belum dipilih), tampilkan alasannya ke layar
+            dd('GAGAL LANJUT KE PEMBAYARAN. Alasan: ', $validator->errors()->all(), 'Data yang terkirim dari web:', $request->all());
         }
 
-        // Hitung Harga (Ambil dari harga khusus jadwal tersebut)
-        $totalPrice = count($requestedSeats) * $showtime->price;
+        try {
+            $showtime = Showtime::with(['movie', 'studio'])->findOrFail($request->showtime_id);
+            $requestedSeats = explode(',', $request->seats);
 
-        // Simpan ke Session (Struktur Data Disederhanakan)
-        $bookingData = [
-            'showtime_id' => $showtime->id,
-            'movie_title' => $showtime->movie->title,
-            'poster'      => $showtime->movie->poster_path,
-            'studio_name' => $showtime->studio->name, // Info Studio
-            'date'        => $showtime->date,         // Info Tanggal
-            'time'        => $showtime->start_time,   // Info Jam
-            'seats'       => $requestedSeats,
-            'total_price' => $totalPrice,
-            'order_id'    => 'TIX-' . strtoupper(uniqid()), 
-        ];
+            // [PERBAIKAN 2]: Cek kursi ganda
+            $existing = Transaction::where('showtime_id', $showtime->id)->get();
+            foreach($existing as $trans) {
+                $booked = explode(',', $trans->seats);
+                if(array_intersect($requestedSeats, $booked)) {
+                    // Jika bentrok, berhentikan sistem dan beri tahu pengguna!
+                    dd('GAGAL: KURSI SUDAH TERISI! Anda mencoba memesan kursi yang sudah dibeli sebelumnya. Silakan kembali dan pilih kursi lain.');
+                }
+            }
 
-        session(['booking' => $bookingData]);
+            $totalPrice = count($requestedSeats) * $showtime->price;
 
-        return redirect()->route('payment.show');
+            // [PERBAIKAN 3]: Gunakan optional() agar tidak error 500 jika relasi Studio/Movie dihapus/kosong
+            $bookingData = [
+                'showtime_id' => $showtime->id,
+                'movie_title' => optional($showtime->movie)->title ?? 'Judul Tidak Ditemukan',
+                'poster'      => optional($showtime->movie)->poster_path ?? '',
+                'studio_name' => optional($showtime->studio)->name ?? 'Studio 01',
+                'region'      => optional($showtime->studio)->region ?? 'Jakarta', 
+                'date'        => $showtime->date,         
+                'time'        => $showtime->start_time,   
+                'seats'       => $requestedSeats,
+                'total_price' => $totalPrice,
+                'order_id'    => 'TIX-' . strtoupper(uniqid()), 
+            ];
+
+            session(['booking' => $bookingData]);
+
+            return redirect()->route('payment.show');
+
+        } catch (\Throwable $e) {
+            // [PERBAIKAN 4]: Tangkap error misterius lainnya
+            dd('TERJADI ERROR SISTEM SAAT MEMPROSES DATA:', $e->getMessage());
+        }
     }
 
     public function showPayment()
@@ -94,7 +123,7 @@ class BookingController extends Controller
         return view('payment', compact('booking'));
     }
 
-    // 2. SUKSES BAYAR
+    // 2. SUKSES BAYAR (Sudah dilengkapi pengecek Firebase)
     public function success()
     {
         $booking = session('booking');
@@ -102,24 +131,25 @@ class BookingController extends Controller
 
         $user = Auth::user();
 
-        // [PENTING] Simpan ke MySQL menggunakan showtime_id
+        // Simpan ke MySQL
         Transaction::create([
             'user_id'     => $user->id,
-            'showtime_id' => $booking['showtime_id'], // KUNCI UTAMA
+            'showtime_id' => $booking['showtime_id'], 
             'order_id'    => $booking['order_id'],
             'seats'       => implode(',', $booking['seats']),
             'total_price' => $booking['total_price'],
             'status'      => 'paid'
         ]);
 
-        // Simpan ke Firebase (Opsional: strukturnya boleh tetap flat agar mudah dibaca di console)
+        // Simpan ke Firebase
         if ($this->firebaseDatabase) {
             $userId = $user->firebase_uid ?? 'user_' . $user->id;
             $firebaseData = [
                 'order_id'    => $booking['order_id'],
                 'movie_title' => $booking['movie_title'],
-                'studio'      => $booking['studio_name'], // Tambahan info studio
-                'seats'       => $booking['seats'],
+                'studio'      => $booking['studio_name'],
+                'region'      => $booking['region'], 
+                'seats'       => implode(', ', $booking['seats']), 
                 'date'        => $booking['date'],
                 'time'        => $booking['time'],
                 'price'       => $booking['total_price'],
@@ -132,7 +162,11 @@ class BookingController extends Controller
                 $this->firebaseDatabase
                      ->getReference('tickets/' . $userId . '/' . $booking['order_id'])
                      ->set($firebaseData);
-            } catch (\Throwable $e) {}
+            } catch (\Throwable $e) {
+                dd('GAGAL SIMPAN KE FIREBASE: ' . $e->getMessage());
+            }
+        } else {
+            dd('KONEKSI FIREBASE GAGAL: File firebase_credentials.json tidak ditemukan atau URL salah.');
         }
 
         $finalTicket = $booking;

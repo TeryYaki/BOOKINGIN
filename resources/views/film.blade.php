@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $movie->title }} – Bookingin</title>
     
-    <!-- Font dan Icon -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Panggilan Library Tailwind CSS (Ini yang membuat navbarnya rapi) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -33,7 +31,7 @@
     </script>
 
     <style>
-        /* Sisa CSS lama untuk bagian hero dan tombol jadwal (jangan dihapus) */
+        /* Sisa CSS lama untuk bagian hero dan tombol jadwal */
         :root { --primary-bg: #0a0a0a; --secondary-bg: #161616; --card-bg: #1f1f1f; --text-main: #ffffff; --text-muted: #a1a1a1; --brand-blue: #3b82f6; --brand-blue-dark: #2563eb; --brand-red: #ef4444; --gradient-main: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
         body { margin: 0; font-family: 'Roboto', sans-serif; background: var(--primary-bg); color: var(--text-main); overflow-x: hidden; }
         
@@ -379,10 +377,13 @@
 
         async function fetchOccupiedSeats(showtimeId) {
             try {
-                const url = `{{ url('/api/occupied-seats') }}?showtime_id=${showtimeId}`;
+                const url = `{{ url('/api/seats') }}?showtime_id=${showtimeId}`;
                 const response = await fetch(url);
                 if (!response.ok) throw new Error('API Error');
+                
                 occupiedSeats = await response.json(); 
+                // [DEBUGGING] Menampilkan data murni dari database ke console Inspect Element
+                console.log("✅ DATA KURSI DARI DATABASE:", occupiedSeats); 
             } catch (error) {
                 console.log("Info: API kursi belum tersedia/error, menganggap semua kursi kosong.");
                 occupiedSeats = [];
@@ -397,7 +398,9 @@
             const cols = selectedShowtime.studio.total_cols;
             
             seatsContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-            const occupiedSet = new Set(occupiedSeats.map(String));
+            
+            // [PERBAIKAN] Pastikan data bersih & HAPUS .map(String(i)) lama yang bikin error
+            const occupiedSet = new Set(occupiedSeats.map(s => String(s).trim().toUpperCase()));
 
             let totalSeats = rows * cols;
             for (let i = 1; i <= totalSeats; i++) {
@@ -412,7 +415,8 @@
                 seat.innerText = seatLabel; 
                 seat.style.fontSize = '0.7rem'; 
 
-                if (occupiedSet.has(String(i)) || occupiedSet.has(seatLabel)) {
+                // [PERBAIKAN] HANYA cocokkan nama label kursinya saja (misal "F4")
+                if (occupiedSet.has(seatLabel)) {
                     seat.classList.add('occupied');
                 } else {
                     seat.onclick = function() {
