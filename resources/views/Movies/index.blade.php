@@ -81,29 +81,7 @@
 </head>
 <body class="bg-primary min-h-screen flex flex-col">
 
-    <header class="navbar-glass fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center">
-        <div class="text-2xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-blue-700">
-            BOOKINGIN
-        </div>
-        <nav class="hidden md:flex gap-6 items-center">
-            <a href="{{ route('home') }}" class="text-textMuted hover:text-white font-medium nav-link">Beranda</a>
-            <a href="{{ route('movies.index') }}" class="text-white font-medium nav-link active">Movies</a>
-            
-            @guest
-                <a href="{{ route('register') }}" class="bg-brandBlue hover:bg-blue-600 text-white px-5 py-2 rounded-full font-semibold transition">Daftar</a>
-                <a href="{{ route('login') }}" class="border border-gray-700 hover:bg-white hover:text-black text-white px-5 py-2 rounded-full font-semibold transition">Login</a>
-            @endguest
-
-            @auth
-                <div class="flex items-center gap-3 border-l border-gray-700 pl-5">
-                    <a href="{{ route('profile') }}" class="flex items-center gap-2 hover:opacity-80 transition">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=3b82f6&color=fff" class="w-8 h-8 rounded-full border border-blue-500">
-                        <span class="font-semibold text-sm">{{ Auth::user()->name }}</span>
-                    </a>
-                </div>
-            @endauth
-        </nav>
-    </header>
+    @include('components.navbar')
 
     <div class="pt-24 pb-12 flex-grow container mx-auto px-4 max-w-6xl">
         
