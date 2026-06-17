@@ -31,7 +31,6 @@
     </script>
 
     <style>
-        /* Sisa CSS lama untuk bagian hero dan tombol jadwal */
         :root { --primary-bg: #0a0a0a; --secondary-bg: #161616; --card-bg: #1f1f1f; --text-main: #ffffff; --text-muted: #a1a1a1; --brand-blue: #3b82f6; --brand-blue-dark: #2563eb; --brand-red: #ef4444; --gradient-main: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
         body { margin: 0; font-family: 'Roboto', sans-serif; background: var(--primary-bg); color: var(--text-main); overflow-x: hidden; }
         
@@ -122,7 +121,7 @@
             @if($movie->status == 'now_showing')
                 <div class="input-group">
                     <label>Pilih Lokasi</label>
-                    <select id="regionSelect" class="city-select" onchange="renderTimeButtons()">
+                    <select id="regionSelect" class="city-select">
                     </select>
                 </div>
 
@@ -135,7 +134,7 @@
                 <div class="input-group">
                     <label>Pilih Waktu & Studio</label>
                     <div class="selection-grid" id="timeContainer">
-                        <span style="color:var(--text-muted); font-style:italic; font-size:0.9rem;">Silakan pilih tanggal dan lokasi terlebih dahulu.</span>
+                        <span style="color:var(--text-muted); font-style:italic; font-size:0.9rem;">Silakan pilih tanggal terlebih dahulu.</span>
                     </div>
                 </div>
 
@@ -209,7 +208,6 @@
                     regionSelect.appendChild(opt);
                 });
                 
-                // Ubah ini: Saat kota diganti, render ulang tanggalnya
                 regionSelect.onchange = function() {
                     renderDateButtons();
                 };
@@ -224,17 +222,22 @@
                 dateContainer.innerHTML = "";
                 const selectedCity = regionSelect.value;
 
-                // Ambil tanggal unik HANYA dari jadwal yang tersedia di kota yang dipilih
+                // RESET status pilihan tanggal & waktu saat ganti kota / render awal
+                selectedDate = ""; 
+                selectedShowtime = null;
+                timeContainer.innerHTML = '<span style="color:var(--text-muted); font-style:italic; font-size:0.9rem;">Silakan pilih tanggal terlebih dahulu.</span>';
+                document.getElementById('priceDisplay').innerText = "Mulai IDR {{ number_format($movie->ticket_price ?? 45000, 0, ',', '.') }}";
+
                 const availableDates = [...new Set(
                     rawShowtimes
                     .filter(s => s.studio && (s.studio.city || 'Kota Belum Diset') === selectedCity)
                     .map(s => s.date ? s.date.substring(0, 10) : "")
                     .filter(d => d !== "")
-                )].sort(); // Urutkan dari tanggal terdekat
+                )].sort(); 
 
                 if (availableDates.length === 0) {
                     dateContainer.innerHTML = '<span style="color:var(--text-muted); font-size:0.9rem; padding:10px;">Tidak ada tanggal tersedia</span>';
-                    timeContainer.innerHTML = '';
+                    timeContainer.innerHTML = '<span style="color:var(--text-muted); font-style:italic; font-size:0.9rem;">Tidak ada jadwal di lokasi ini.</span>';
                     return;
                 }
 
@@ -245,11 +248,7 @@
                 let nowDay = ("0" + today.getDate()).slice(-2);
                 const todayStr = `${nowYear}-${nowMonth}-${nowDay}`;
 
-                // Set otomatis tanggal yang terpilih ke tanggal pertama yang tersedia
-                selectedDate = availableDates[0];
-
                 availableDates.forEach((dateStr) => {
-                    // Abaikan jika jadwalnya adalah hari-hari yang sudah lewat (kemarin dst)
                     if (dateStr < todayStr) return;
 
                     let d = new Date(dateStr);
@@ -258,24 +257,17 @@
                     let btn = document.createElement('button');
                     btn.className = 'select-btn date-btn';
                     
-                    if(dateStr === selectedDate) { 
-                        btn.classList.add('active');
-                    }
-                    
                     btn.innerHTML = `<div style="font-size:0.8rem; opacity:0.7;">${dayName}</div><div style="font-size:1.1rem;">${d.getDate()}</div>`;
                     
                     btn.onclick = function() {
                         document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
                         selectedDate = dateStr;
-                        renderTimeButtons();
+                        renderTimeButtons(); // Jam BARU AKAN MERENDER setelah tombol tanggal di-klik manual
                     };
                     
                     dateContainer.appendChild(btn);
                 });
-
-                // Setelah tombol tanggal dibuat, langsung render tombol jamnya
-                renderTimeButtons();
             }
 
             // --- 3. RENDER TOMBOL WAKTU ---
@@ -283,6 +275,12 @@
                 const selectedCity = regionSelect.value;
                 timeContainer.innerHTML = '';
                 selectedShowtime = null; 
+
+                // Proteksi jika fungsi dipanggil paksa padahal tanggal kosong
+                if (!selectedDate) {
+                    timeContainer.innerHTML = '<span style="color:var(--text-muted); font-style:italic; font-size:0.9rem;">Silakan pilih tanggal terlebih dahulu.</span>';
+                    return;
+                }
 
                 const availableShowtimes = rawShowtimes.filter(s => {
                     if (!s.studio) return false;
@@ -292,7 +290,7 @@
                 });
 
                 if (availableShowtimes.length === 0) {
-                    timeContainer.innerHTML = '<span style="color:var(--text-muted); width:100%; text-align:center; padding:20px;">Tidak ada jam tayang tersedia.</span>';
+                    timeContainer.innerHTML = '<span style="color:var(--text-muted); width:100%; text-align:center; padding:20px;">Tidak ada jam tayang tersedia pada tanggal ini.</span>';
                     return;
                 }
 
@@ -382,7 +380,6 @@
                 if (!response.ok) throw new Error('API Error');
                 
                 occupiedSeats = await response.json(); 
-                // [DEBUGGING] Menampilkan data murni dari database ke console Inspect Element
                 console.log("✅ DATA KURSI DARI DATABASE:", occupiedSeats); 
             } catch (error) {
                 console.log("Info: API kursi belum tersedia/error, menganggap semua kursi kosong.");
@@ -399,7 +396,6 @@
             
             seatsContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
             
-            // [PERBAIKAN] Pastikan data bersih & HAPUS .map(String(i)) lama yang bikin error
             const occupiedSet = new Set(occupiedSeats.map(s => String(s).trim().toUpperCase()));
 
             let totalSeats = rows * cols;
@@ -415,7 +411,6 @@
                 seat.innerText = seatLabel; 
                 seat.style.fontSize = '0.7rem'; 
 
-                // [PERBAIKAN] HANYA cocokkan nama label kursinya saja (misal "F4")
                 if (occupiedSet.has(seatLabel)) {
                     seat.classList.add('occupied');
                 } else {

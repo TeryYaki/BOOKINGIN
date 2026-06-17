@@ -6,52 +6,58 @@ use Illuminate\Http\Request;
 use App\Models\Showtime;
 use App\Models\Movie;
 use App\Models\Studio;
-use Carbon\Carbon; // [PENTING] Import library untuk hitung jam
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB; // Pastikan ini ditambahkan
 
 class ShowtimeController extends Controller
 {
     // Tampilkan Form Tambah Jadwal
     public function create()
     {
-        // Kita butuh data Film dan Studio untuk dropdown
         $movies = Movie::where('status', 'now_showing')->get();
         $studios = Studio::all();
         
         return view('admin.showtimes.create', compact('movies', 'studios'));
     }
 
-    // Simpan Jadwal
+    // Simpan Jadwal Massal
     public function store(Request $request)
     {
+        // Validasi input sebagai array
         $request->validate([
-            'movie_id' => 'required|exists:movies,id',
-            'studio_id' => 'required|exists:studios,id',
-            'date' => 'required|date',
-            'start_time' => 'required',
-            'price' => 'required|numeric'
+            'schedules' => 'required|array|min:1',
+            'schedules.*.movie_id' => 'required|exists:movies,id',
+            'schedules.*.studio_id' => 'required|exists:studios,id',
+            'schedules.*.date' => 'required|date',
+            'schedules.*.start_time' => 'required',
+            'schedules.*.price' => 'required|numeric|min:0'
         ]);
 
-        // [PERBAIKAN] Hitung End Time Otomatis
-        // Asumsi durasi film standar 2 jam (120 menit) + 15 menit bersih-bersih
-        // Jika Anda punya kolom 'duration' di tabel movies, bisa ambil dari sana.
-        try {
-            $startTime = Carbon::createFromFormat('H:i', $request->start_time);
-        } catch (\Exception $e) {
-            // Fallback jika format input berbeda (misal H:i:s)
-            $startTime = Carbon::createFromFormat('H:i:s', $request->start_time);
-        }
-        
-        $endTime = $startTime->copy()->addMinutes(135); // Tambah 2 jam 15 menit
+        // Gunakan Transaction untuk efisiensi dan keamanan database
+        DB::transaction(function () use ($request) {
+            foreach ($request->schedules as $item) {
+                
+                // Hitung End Time Otomatis per baris
+                try {
+                    $startTime = Carbon::createFromFormat('H:i', $item['start_time']);
+                } catch (\Exception $e) {
+                    $startTime = Carbon::createFromFormat('H:i:s', $item['start_time']);
+                }
+                
+                // Tambah 2 jam 15 menit (135 menit)
+                $endTime = $startTime->copy()->addMinutes(135);
 
-        Showtime::create([
-            'movie_id' => $request->movie_id,
-            'studio_id' => $request->studio_id,
-            'date' => $request->date,
-            'start_time' => $request->start_time,
-            'end_time' => $endTime->format('H:i'), // [PENTING] Masukkan end_time
-            'price' => $request->price
-        ]);
+                Showtime::create([
+                    'movie_id'   => $item['movie_id'],
+                    'studio_id'  => $item['studio_id'],
+                    'date'       => $item['date'],
+                    'start_time' => $item['start_time'],
+                    'end_time'   => $endTime->format('H:i'), 
+                    'price'      => $item['price']
+                ]);
+            }
+        });
 
-        return redirect()->route('admin.dashboard')->with('success', 'Jadwal tayang berhasil ditambahkan!');
+        return redirect()->route('admin.dashboard')->with('success', 'Semua jadwal tayang berhasil ditambahkan!');
     }
 }
